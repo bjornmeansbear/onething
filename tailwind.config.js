@@ -3,6 +3,19 @@ export default {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
 	theme: {
 		extend: {
+			colors: {
+				red:         Object.fromEntries([...Array(10).keys()].map(i => [i, `var(--red-${i})`])),
+				orange:      Object.fromEntries([...Array(10).keys()].map(i => [i, `var(--orange-${i})`])),
+				yellow:      Object.fromEntries([...Array(10).keys()].map(i => [i, `var(--yellow-${i})`])),
+				green:       Object.fromEntries([...Array(10).keys()].map(i => [i, `var(--green-${i})`])),
+				blue:        Object.fromEntries([...Array(10).keys()].map(i => [i, `var(--blue-${i})`])),
+				purple:      Object.fromEntries([...Array(10).keys()].map(i => [i, `var(--purple-${i})`])),
+				pink:        Object.fromEntries([...Array(10).keys()].map(i => [i, `var(--pink-${i})`])),
+				brown:       Object.fromEntries([...Array(10).keys()].map(i => [i, `var(--brown-${i})`])),
+				gray:        Object.fromEntries([...Array(10).keys()].map(i => [i, `var(--gray-${i})`])),
+				'dark-gray': Object.fromEntries([...Array(10).keys()].map(i => [i, `var(--dark-gray-${i})`])),
+				'light-gray':Object.fromEntries([...Array(10).keys()].map(i => [i, `var(--light-gray-${i})`])),
+			},
 			fontFamily: {
 				mac: ["'Chicago'", "'Geneva'", "'Charcoal'", "'Lucida Grande'", 'system-ui', 'sans-serif'],
 				mono: ["'Monaco'", "'Menlo'", "'Courier New'", 'monospace']
