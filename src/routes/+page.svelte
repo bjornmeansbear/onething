@@ -102,53 +102,51 @@
 	$: behind = Math.min(remaining - 1, 8);
 </script>
 
-<div class="min-h-screen bg-[#c0c0c0] font-mac text-[12px] text-black pb-8">
+<div class="min-h-screen bg-[color:var(--color-bg)] font-mac text-base text-[color:var(--color-text)] pb-16">
 
 	<!-- ── ONBOARDING ── -->
 	{#if phase === 'onboarding'}
 		<div class="win">
 			<div class="win-titlebar">
-				<div class="win-dot"></div>
 				<span class="win-title">One Thing</span>
-				<div style="width:12px"></div>
 			</div>
-			<div class="win-body space-y-4">
-				<p class="font-bold text-[13px]">Before we begin —</p>
-				<p class="text-[10px] text-[#666]">Three quick questions to help sort your day.</p>
+			<div class="win-body space-y-6">
+				<p class="text-2xl font-bold">Before we begin —</p>
+				<p class="text-base text-[color:var(--color-text-muted)]">Three quick questions to help sort your day.</p>
 
-				<div class="space-y-3">
+				<div class="space-y-4">
 					<label class="block">
-						<span class="block text-[11px] font-bold mb-1">Anything you already know is important today?</span>
+						<span class="block text-base font-bold mb-2">Anything you already know is important today?</span>
 						<input
 							type="text"
 							bind:value={ctx.important}
 							placeholder="e.g. finish proposal draft, call with client"
-							class="w-full border-2 border-black bg-white px-2 py-1 text-[12px] focus:outline-none font-mac"
+							class="w-full border-2 border-[color:var(--color-text)] bg-[color:var(--color-bg)] px-3 py-2 text-base focus:outline-none font-mac"
 						/>
 					</label>
 
 					<label class="block">
-						<span class="block text-[11px] font-bold mb-1">What meetings do you have today?</span>
+						<span class="block text-base font-bold mb-2">What meetings do you have today?</span>
 						<input
 							type="text"
 							bind:value={ctx.meetings}
 							placeholder="e.g. 2pm team standup, 4pm client review"
-							class="w-full border-2 border-black bg-white px-2 py-1 text-[12px] focus:outline-none font-mac"
+							class="w-full border-2 border-[color:var(--color-text)] bg-[color:var(--color-bg)] px-3 py-2 text-base focus:outline-none font-mac"
 						/>
 					</label>
 
 					<label class="block">
-						<span class="block text-[11px] font-bold mb-1">Anything from yesterday you didn't get to?</span>
+						<span class="block text-base font-bold mb-2">Anything from yesterday you didn't get to?</span>
 						<input
 							type="text"
 							bind:value={ctx.carried}
 							placeholder="e.g. that email, the expense report"
-							class="w-full border-2 border-black bg-white px-2 py-1 text-[12px] focus:outline-none font-mac"
+							class="w-full border-2 border-[color:var(--color-text)] bg-[color:var(--color-bg)] px-3 py-2 text-base focus:outline-none font-mac"
 						/>
 					</label>
 				</div>
 
-				<div class="flex justify-end pt-2">
+				<div class="flex justify-end pt-4">
 					<button class="btn btn-black" on:click={startSession}>
 						Load my tasks →
 					</button>
@@ -165,12 +163,10 @@
 	{#if phase === 'loading'}
 		<div class="win">
 			<div class="win-titlebar">
-				<div class="win-dot"></div>
 				<span class="win-title">One Thing</span>
-				<div style="width:12px"></div>
 			</div>
-			<div class="win-body text-center py-10 text-[#666]">
-				<div class="text-[20px] mb-3">■</div>
+			<div class="win-body text-center py-16 text-[color:var(--color-text-muted)]">
+				<div class="text-4xl mb-4">■</div>
 				Loading from Notion...
 			</div>
 		</div>
@@ -180,49 +176,47 @@
 	{#if phase === 'triage'}
 		<div class="win">
 			<div class="win-titlebar">
-				<div class="win-dot"></div>
 				<span class="win-title">One Thing</span>
-				<div style="width:12px"></div>
 			</div>
 			<div class="win-body">
-				<p class="font-bold text-[13px] mb-1">What needs your attention today?</p>
-				<p class="text-[10px] text-[#666] mb-3">Not "is this important" — just "does it need to be today?"</p>
+				<p class="text-2xl font-bold mb-2">What needs your attention today?</p>
+				<p class="text-base text-[color:var(--color-text-muted)] mb-6">Not "is this important" — just "does it need to be today?"</p>
 
 				{#if loadError}
-					<div class="border-2 border-black bg-[#fff0f0] px-3 py-2 text-[11px] mb-3">
+					<div class="border-2 border-[color:var(--color-danger)] bg-[color:var(--color-danger-bg)] text-[color:var(--color-danger)] px-4 py-3 text-base mb-6">
 						{loadError}
 					</div>
 				{/if}
 
-				<div class="max-h-[380px] overflow-y-auto border border-[#ccc] bg-[#fafafa] p-1">
+				<div class="max-h-[420px] overflow-y-auto border-2 border-[color:var(--color-text)] p-2">
 					{#each tasks as task, i}
-						<label class="flex items-start gap-2 px-1 py-[5px] border-b border-dotted border-[#ddd] cursor-pointer hover:bg-[#f0f0f0]">
+						<label class="flex items-start gap-3 px-2 py-3 border-b-2 border-[color:var(--color-text)] last:border-b-0 cursor-pointer hover:bg-[color:var(--color-accent-subtle)]">
 							<input
 								type="checkbox"
 								checked={selected.has(i)}
 								on:change={() => toggle(i)}
-								class="mt-[2px] cursor-pointer"
+								class="mt-1 cursor-pointer"
 							/>
-							<span class="flex-1 leading-tight">
+							<span class="flex-1 leading-snug">
 								<span class:font-bold={task.important}>{task.name}</span>
 								{#if task.dueDate}
-									<span class="text-[10px] text-[#888] ml-1">due {task.dueDate}</span>
+									<span class="text-sm text-[color:var(--color-text-muted)] ml-1">due {task.dueDate}</span>
 								{/if}
 								{#if task.urgent}
-									<span class="text-[9px] bg-black text-white px-1 ml-1">URGENT</span>
+									<span class="text-xs bg-black text-white px-1.5 py-0.5 ml-1">URGENT</span>
 								{/if}
 								{#if task.timeEstimate}
-									<span class="text-[9px] text-[#aaa] ml-1">{task.timeEstimate}</span>
+									<span class="text-xs text-[color:var(--color-text-muted)] ml-1">{task.timeEstimate}</span>
 								{/if}
 							</span>
 						</label>
 					{:else}
-						<div class="text-center py-8 text-[#888]">No incomplete tasks found.</div>
+						<div class="text-center py-8 text-[color:var(--color-text-muted)]">No incomplete tasks found.</div>
 					{/each}
 				</div>
 
-				<div class="flex justify-between items-center mt-3">
-					<span class="text-[10px] text-[#888]">Aim for 3–7. Less is more.</span>
+				<div class="flex justify-between items-center mt-4">
+					<span class="text-sm text-[color:var(--color-text-muted)]">Aim for 3–7. Less is more.</span>
 					<button
 						class="btn btn-black"
 						on:click={buildStack}
@@ -232,7 +226,7 @@
 					</button>
 				</div>
 
-				<hr class="divider mt-3" />
+				<hr class="divider" />
 				<p class="mantra">{MANTRAS[0]}</p>
 			</div>
 			<div class="win-footer">
@@ -246,15 +240,13 @@
 	{#if phase === 'sorting'}
 		<div class="win">
 			<div class="win-titlebar">
-				<div class="win-dot"></div>
 				<span class="win-title">One Thing</span>
-				<div style="width:12px"></div>
 			</div>
-			<div class="win-body text-center py-10 text-[#666]">
-				<div class="text-[20px] mb-3 animate-pulse">■</div>
+			<div class="win-body text-center py-16 text-[color:var(--color-text-muted)]">
+				<div class="text-4xl mb-4 animate-pulse">■</div>
 				Building your stack...
 				{#if sortError}
-					<div class="text-[10px] text-[#888] mt-2">{sortError}</div>
+					<div class="text-sm text-[color:var(--color-text-muted)] mt-3">{sortError}</div>
 				{/if}
 			</div>
 		</div>
@@ -263,59 +255,56 @@
 	<!-- ── FOCUS ── -->
 	{#if phase === 'focus' && stack[idx]}
 		{#if !emailUnlocked}
-			<div class="mx-auto mt-4 max-w-[520px] w-[calc(100%-32px)] bg-black text-white text-center py-2 text-[11px] font-bold tracking-[0.05em]">
+			<div class="mx-auto mt-8 max-w-[640px] w-[calc(100%-32px)] bg-[color:var(--color-accent)] text-[color:var(--color-bg)] text-center py-3 text-sm font-bold tracking-[0.05em]">
 				Your focus is protected. No email until task 1 is done.
 			</div>
 		{/if}
 
 		<div class="win" class:mt-0={!emailUnlocked}>
 			<div class="win-titlebar">
-				<div class="win-dot"></div>
 				<span class="win-title">One Thing</span>
-				<div style="width:12px"></div>
 			</div>
 			<div class="win-body">
 				<!-- Card stack -->
 				<div
 					class="relative"
-					style="margin-bottom: {behind * 3 + 12}px; margin-right: {behind * 3}px;"
+					style="margin-bottom: {behind * 4 + 16}px; margin-right: {behind * 4}px;"
 				>
 					<!-- Background cards -->
 					{#each Array(behind) as _, bi}
 						{@const depth = behind - bi}
 						<div
-							class="absolute border-2 border-black"
+							class="absolute border-2 border-[color:var(--color-text)] bg-[color:var(--color-bg)]"
 							style="
-								top: {depth * 3}px;
-								left: {depth * 3}px;
-								right: -{depth * 3}px;
-								bottom: -{depth * 3}px;
-								background: {depth <= 2 ? '#f2f2f2' : '#e4e4e4'};
+								top: {depth * 4}px;
+								left: {depth * 4}px;
+								right: -{depth * 4}px;
+								bottom: -{depth * 4}px;
 							"
 						></div>
 					{/each}
 
 					<!-- Front card -->
-					<div class="relative border-2 border-black bg-white p-6 z-10">
-						<p class="label-upper mb-2">Do this now</p>
-						<h2 class="text-[20px] font-bold leading-tight mb-2">{stack[idx].name}</h2>
+					<div class="relative border-2 border-[color:var(--color-text)] bg-[color:var(--color-bg)] p-10 z-10">
+						<p class="label-upper mb-3">Do this now</p>
+						<h2 class="text-4xl font-bold leading-tight mb-3">{stack[idx].name}</h2>
 						{#if stack[idx].dueDate}
-							<p class="text-[10px] text-[#888]">Due: {stack[idx].dueDate}</p>
+							<p class="text-sm text-[color:var(--color-text-muted)]">Due: {stack[idx].dueDate}</p>
 						{/if}
 						{#if stack[idx].reason}
-							<p class="text-[11px] text-[#555] italic border-t border-[#ddd] pt-2 mt-3">
+							<p class="text-base text-[color:var(--color-text-muted)] italic border-t-2 border-[color:var(--color-text)] pt-3 mt-4">
 								↳ {stack[idx].reason}
 							</p>
 						{/if}
 					</div>
 				</div>
 
-				<div class="flex justify-center gap-2 mt-2">
+				<div class="flex justify-center gap-3 mt-6">
 					<button class="btn" on:click={() => advance(false)}>Skip →</button>
 					<button class="btn btn-black" on:click={() => advance(true)}>✓ Done</button>
 				</div>
 
-				<hr class="divider mt-4" />
+				<hr class="divider" />
 				<p class="mantra">{mantra()}</p>
 			</div>
 			<div class="win-footer">
@@ -329,14 +318,12 @@
 	{#if phase === 'done'}
 		<div class="win">
 			<div class="win-titlebar">
-				<div class="win-dot"></div>
 				<span class="win-title">One Thing</span>
-				<div style="width:12px"></div>
 			</div>
-			<div class="win-body text-center py-10 px-5">
-				<div class="text-[28px] mb-3">■</div>
-				<p class="text-[14px] font-bold mb-2">Stack complete.</p>
-				<p class="text-[12px] text-[#666] mb-6">
+			<div class="win-body text-center py-16 px-8">
+				<div class="text-6xl mb-4">■</div>
+				<p class="text-3xl font-bold mb-4">Stack complete.</p>
+				<p class="text-base text-[color:var(--color-text-muted)] mb-8">
 					{doneCount} task{doneCount !== 1 ? 's' : ''} done today. Everything else can wait.
 				</p>
 				<button class="btn" on:click={resetToTriage}>Start a new stack →</button>

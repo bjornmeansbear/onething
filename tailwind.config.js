@@ -17,8 +17,8 @@ export default {
 				'light-gray':Object.fromEntries([...Array(10).keys()].map(i => [i, `var(--light-gray-${i})`])),
 			},
 			fontFamily: {
-				mac: ["'Chicago'", "'Geneva'", "'Charcoal'", "'Lucida Grande'", 'system-ui', 'sans-serif'],
-				mono: ["'Monaco'", "'Menlo'", "'Courier New'", 'monospace']
+				mac: ['system-ui', "'Segoe UI'", 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+				mono: ['ui-monospace', 'SFMono-Regular', 'Consolas', 'Menlo', 'monospace']
 			},
 			boxShadow: {
 				mac: '2px 2px 0px #000000',
