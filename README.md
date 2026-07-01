@@ -2,6 +2,8 @@
 
 A personal executive-functioning tool — a focusing lens on top of a Notion task database that surfaces ONE task at a time. See [CLAUDE-CODE-HANDOFF.md](./CLAUDE-CODE-HANDOFF.md) for the full product spec, build status, and design principles.
 
+Hopefully I can figure out how to automate this a bit more. Trying to use AI to make my life more analog, simple, clear, productive - productive in the sense that I do MORE of what I want to the way I want :)
+
 ## Stack
 
 - SvelteKit (Svelte 5) + Tailwind CSS
