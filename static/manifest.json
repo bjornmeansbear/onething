@@ -4,8 +4,8 @@
 	"description": "One task at a time.",
 	"start_url": "/",
 	"display": "standalone",
-	"background_color": "#c0c0c0",
-	"theme_color": "#c0c0c0",
+	"background_color": "#f7f8ee",
+	"theme_color": "#f7f8ee",
 	"orientation": "portrait",
 	"icons": [
 		{
