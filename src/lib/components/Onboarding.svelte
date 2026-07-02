@@ -5,7 +5,7 @@
 
 <div class="space-y-6">
 	<p class="text-2xl font-bold">Before we begin —</p>
-	<p class="text-base text-[color:var(--color-text-muted)]">Three quick questions to help sort your day.</p>
+	<p class="text-base text-[color:var(--color-text-muted)]">Three quick questions, then it picks your first thing — no list to sort through.</p>
 
 	<div class="space-y-4">
 		<label class="block">
@@ -41,7 +41,7 @@
 
 	<div class="flex justify-end pt-4">
 		<button class="btn btn-black" on:click={onSubmit}>
-			Load my tasks →
+			Show me my one thing →
 		</button>
 	</div>
 </div>

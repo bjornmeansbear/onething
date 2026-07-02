@@ -32,17 +32,17 @@ export async function POST({ request, platform }) {
 		? `\nSession context:\n- Important today: ${context.important || 'nothing noted'}\n- Meetings: ${context.meetings || 'none'}\n- Carried over: ${context.carried || 'nothing'}\n`
 		: '';
 
-	const prompt = `You are a personal executive functioning coach. Sort these tasks into optimal order for TODAY.${contextBlock}
+	const prompt = `You are a personal executive functioning coach. Below is EVERY incomplete task this person has — they have not pre-filtered this list themselves. Your job is to both PICK which ones genuinely deserve attention today and RANK them, so they don't have to decide anything.${contextBlock}
 Use these 4 criteria:
 1. What breaks if I don't do this today? (consequences, urgency)
 2. Does this make other things easier? (leverage, unlocking)
 3. Can I finish this in one sitting? (sizing — favor completable tasks)
 4. What's the best thing that happens if I DO this? (positive value)
 
-Tasks:
+All incomplete tasks:
 ${taskList}
 
-Return ONLY a JSON array sorted highest priority first: [{"index": 1, "reason": "one short phrase"}, ...]
+Return ONLY a JSON array of AT MOST 5 tasks — fewer if fewer than 5 genuinely need today's attention — sorted highest priority first: [{"index": 1, "reason": "one short phrase"}, ...]
 No markdown, no extra text, no explanation outside the JSON.`;
 
 	const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -53,8 +53,8 @@ No markdown, no extra text, no explanation outside the JSON.`;
 			'content-type': 'application/json'
 		},
 		body: JSON.stringify({
-			model: 'claude-sonnet-4-20250514',
-			max_tokens: 1024,
+			model: 'claude-sonnet-5',
+			max_tokens: 4096,
 			messages: [{ role: 'user', content: prompt }]
 		})
 	});
@@ -72,8 +72,9 @@ No markdown, no extra text, no explanation outside the JSON.`;
 
 	const match = text.replace(/```json|```/g, '').match(/\[[\s\S]*\]/);
 	if (!match) {
-		// Fall back to original order with no reasons
-		return json(tasks.map((_, i) => ({ index: i + 1, reason: '' })));
+		// Fall back to the first 5 in original order, no reasons — still capped,
+		// so a parse failure doesn't dump the whole list back on the user.
+		return json(tasks.slice(0, 5).map((_, i) => ({ index: i + 1, reason: '' })));
 	}
 
 	const order = JSON.parse(match[0]);

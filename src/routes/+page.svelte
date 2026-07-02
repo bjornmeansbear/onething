@@ -3,12 +3,12 @@
 	import Window from '$lib/components/Window.svelte';
 	import Onboarding from '$lib/components/Onboarding.svelte';
 	import Loading from '$lib/components/Loading.svelte';
-	import Triage from '$lib/components/Triage.svelte';
 	import Sorting from '$lib/components/Sorting.svelte';
 	import Focus from '$lib/components/Focus.svelte';
 	import Done from '$lib/components/Done.svelte';
 
-	// ── phases: onboarding → loading → triage → sorting → focus → done
+	// ── phases: onboarding → loading → sorting → focus → done
+	// The AI picks AND ranks — there is no manual task-selection step.
 	let phase = 'onboarding';
 
 	// Onboarding
@@ -16,7 +16,7 @@
 
 	// Tasks
 	let tasks = [];
-	let selected = new Set();
+	let loaded = false;
 
 	// Stack
 	let stack = [];
@@ -32,43 +32,41 @@
 	let mantraIdx = 0;
 	$: mantraText = MANTRAS[mantraIdx % MANTRAS.length];
 
-	function toggle(i) {
-		const next = new Set(selected);
-		next.has(i) ? next.delete(i) : next.add(i);
-		selected = next;
-	}
-
 	async function startSession() {
 		phase = 'loading';
 		loadError = '';
+		loaded = false;
 		try {
 			const res = await fetch('/api/tasks');
 			if (!res.ok) throw new Error(await res.text());
 			tasks = await res.json();
-			selected = new Set();
 		} catch (e) {
 			loadError = e.message ?? 'Failed to load tasks.';
+			loaded = true;
+			return;
 		}
-		phase = 'triage';
+		if (!tasks.length) {
+			loaded = true;
+			return;
+		}
+		await buildStack();
 	}
 
 	async function buildStack() {
-		const picks = tasks.filter((_, i) => selected.has(i));
-		if (!picks.length) return;
 		phase = 'sorting';
 		sortError = '';
 		try {
 			const res = await fetch('/api/sort', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ tasks: picks, context: ctx })
+				body: JSON.stringify({ tasks, context: ctx })
 			});
 			if (!res.ok) throw new Error(await res.text());
 			const order = await res.json();
-			stack = order.map((x) => ({ ...picks[x.index - 1], reason: x.reason }));
+			stack = order.map((x) => ({ ...tasks[x.index - 1], reason: x.reason }));
 		} catch (e) {
-			sortError = e.message ?? 'Sort failed — using your selection order.';
-			stack = picks.map((t) => ({ ...t, reason: '' }));
+			sortError = e.message ?? 'Sort failed — showing the first 5 instead.';
+			stack = tasks.slice(0, 5).map((t) => ({ ...t, reason: '' }));
 		}
 		idx = 0;
 		doneCount = 0;
@@ -96,9 +94,9 @@
 		}
 	}
 
-	function resetToTriage() {
-		phase = 'triage';
-		selected = new Set();
+	function resetToOnboarding() {
+		phase = 'onboarding';
+		tasks = [];
 		stack = [];
 		idx = 0;
 		doneCount = 0;
@@ -122,16 +120,8 @@
 	{/if}
 
 	{#if phase === 'loading'}
-		<Window><Loading /></Window>
-	{/if}
-
-	{#if phase === 'triage'}
 		<Window>
-			<Triage {tasks} {selected} {loadError} onToggle={toggle} onBuildStack={buildStack} />
-			<svelte:fragment slot="footer">
-				<span>{selected.size} selected</span>
-				<span>{tasks.length} total</span>
-			</svelte:fragment>
+			<Loading error={loadError} empty={loaded && tasks.length === 0} onRetry={startSession} />
 		</Window>
 	{/if}
 
@@ -156,7 +146,7 @@
 	{/if}
 
 	{#if phase === 'done'}
-		<Window><Done {doneCount} onReset={resetToTriage} /></Window>
+		<Window><Done {doneCount} onReset={resetToOnboarding} /></Window>
 	{/if}
 
 </div>
