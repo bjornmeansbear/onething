@@ -97,11 +97,10 @@
 }
 
 @layer components {
-	/* A single bordered section — no title-bar chrome, no shadow.
-	   Structure comes from black rules (border-top/bottom) and generous whitespace. */
+	/* No outer box — the cards themselves carry the border. This wrapper is
+	   just a max-width/centering container. */
 	.win {
 		background: var(--color-bg);
-		border: 2px solid var(--color-text);
 		margin: 32px auto;
 		max-width: 640px;
 		width: calc(100% - 32px);
@@ -122,7 +121,6 @@
 	}
 
 	.win-footer {
-		border-top: 2px solid var(--color-text);
 		padding: 16px 32px;
 		font-size: 14px;
 		color: var(--color-text-muted);

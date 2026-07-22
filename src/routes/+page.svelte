@@ -1,28 +1,26 @@
 <script>
+	import { onMount } from 'svelte';
 	import { MANTRAS } from '$lib/mantras.js';
 	import Window from '$lib/components/Window.svelte';
-	import Onboarding from '$lib/components/Onboarding.svelte';
 	import Loading from '$lib/components/Loading.svelte';
 	import Sorting from '$lib/components/Sorting.svelte';
 	import Focus from '$lib/components/Focus.svelte';
 	import Done from '$lib/components/Done.svelte';
 
-	// ── phases: onboarding → loading → sorting → focus → done
-	// The AI picks AND ranks — there is no manual task-selection step.
-	let phase = 'onboarding';
-
-	// Onboarding
-	let ctx = { important: '', meetings: '', carried: '' };
+	// ── phases: loading → sorting → focus → done
+	// The AI picks AND ranks — there is no manual task-selection step, and
+	// no questions to answer first. Open the app, see the pick.
+	let phase = 'loading';
 
 	// Tasks
 	let tasks = [];
 	let loaded = false;
 
-	// Stack
+	// Stack — a queue: stack[0] is always the current card. Skipping moves
+	// it to the back instead of dropping it, so it comes back around.
 	let stack = [];
-	let idx = 0;
 	let doneCount = 0;
-	let emailUnlocked = false;
+	let skippedCount = 0;
 
 	// Errors
 	let loadError = '';
@@ -59,7 +57,7 @@
 			const res = await fetch('/api/sort', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ tasks, context: ctx })
+				body: JSON.stringify({ tasks })
 			});
 			if (!res.ok) throw new Error(await res.text());
 			const order = await res.json();
@@ -68,56 +66,50 @@
 			sortError = e.message ?? 'Sort failed — showing the first 5 instead.';
 			stack = tasks.slice(0, 5).map((t) => ({ ...t, reason: '' }));
 		}
-		idx = 0;
 		doneCount = 0;
-		emailUnlocked = false;
+		skippedCount = 0;
 		mantraIdx = Math.floor(Math.random() * MANTRAS.length);
 		phase = 'focus';
 	}
 
 	async function advance(completed) {
-		if (completed && stack[idx]?.id) {
-			// Fire-and-forget — don't block UI on Notion write
-			fetch('/api/done', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ pageId: stack[idx].id })
-			}).catch(() => {});
+		const card = stack[0];
+		if (completed) {
+			if (card?.id) {
+				// Fire-and-forget — don't block UI on Notion write
+				fetch('/api/done', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ pageId: card.id })
+				}).catch(() => {});
+			}
 			doneCount++;
-		}
-		if (!emailUnlocked) emailUnlocked = true;
-		if (idx + 1 >= stack.length) {
-			phase = 'done';
+			stack = stack.slice(1);
+			if (stack.length === 0) {
+				phase = 'done';
+				return;
+			}
 		} else {
-			idx++;
-			mantraIdx++;
+			skippedCount++;
+			stack = [...stack.slice(1), card];
 		}
+		mantraIdx++;
 	}
 
-	function resetToOnboarding() {
-		phase = 'onboarding';
+	function startNewStack() {
 		tasks = [];
 		stack = [];
-		idx = 0;
 		doneCount = 0;
-		emailUnlocked = false;
+		skippedCount = 0;
+		startSession();
 	}
 
-	$: remaining = stack.length - idx;
-	$: behind = Math.min(remaining - 1, 8);
+	onMount(startSession);
+
+	$: behind = Math.min(stack.length - 1, 8);
 </script>
 
 <div class="min-h-screen bg-[color:var(--color-bg)] font-mac text-base text-[color:var(--color-text)] pb-16">
-
-	{#if phase === 'onboarding'}
-		<Window>
-			<Onboarding {ctx} onSubmit={startSession} />
-			<svelte:fragment slot="footer">
-				<span>One Thing</span>
-				<span>executive focus tool</span>
-			</svelte:fragment>
-		</Window>
-	{/if}
 
 	{#if phase === 'loading'}
 		<Window>
@@ -129,24 +121,17 @@
 		<Window><Sorting {sortError} /></Window>
 	{/if}
 
-	{#if phase === 'focus' && stack[idx]}
-		{#if !emailUnlocked}
-			<div class="mx-auto mt-8 max-w-[640px] w-[calc(100%-32px)] bg-[color:var(--color-accent)] text-[color:var(--color-bg)] text-center py-3 text-sm font-bold tracking-[0.05em]">
-				Your focus is protected. No email until task 1 is done.
-			</div>
-		{/if}
-
-		<Window class={!emailUnlocked ? 'mt-0' : ''}>
-			<Focus {stack} {idx} {behind} {mantraText} onAdvance={advance} />
+	{#if phase === 'focus' && stack[0]}
+		<Window>
+			<Focus {stack} {behind} {mantraText} onAdvance={advance} />
 			<svelte:fragment slot="footer">
-				<span>{doneCount} done</span>
-				<span>{emailUnlocked ? 'unlocked' : 'locked'}</span>
+				<span>{doneCount} done{skippedCount ? ` · ${skippedCount} skipped` : ''}</span>
 			</svelte:fragment>
 		</Window>
 	{/if}
 
 	{#if phase === 'done'}
-		<Window><Done {doneCount} onReset={resetToOnboarding} /></Window>
+		<Window><Done {doneCount} onReset={startNewStack} /></Window>
 	{/if}
 
 </div>
