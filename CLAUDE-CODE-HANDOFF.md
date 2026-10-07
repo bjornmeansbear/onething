@@ -11,6 +11,7 @@
 - Done: **removed the manual Triage/checkbox screen entirely** — onboarding now goes straight into the AI picking *and* ranking from every incomplete Notion task, landing directly on Focus. See App flow and Decisions log below for why.
 - Done: fixed two real bugs in `/api/sort` found while testing the above — the hardcoded model id (`claude-sonnet-4-20250514`) had been retired (404), so AI sorting had likely been silently falling back to default order for a while; and `max_tokens: 1024` was too tight once the model's extended-thinking tokens are counted against it, intermittently truncating the JSON response. Now `claude-sonnet-5` at `max_tokens: 4096`, verified reliable across repeated runs.
 - Done: added 5 new mantras to `mantras.js` sourced from the user's own affirmations notes (curated for the "just do the one thing" voice, not the broader self-help material also found there).
+- Done (2026-10-07): **the pile, the stamp, the tabs, the sticker.** Cards are a tilted pile now (each card keeps a random 1.5–4° tilt, alternating sides; the front card shows 30% of its own). Done slaps a pink "✓ DONE" sticker on the card's right corner before it flies off right; Skip pops a dark "SKIPPED" folder tab on the left and the card slides off left to the back. Skipped cards keep their tab in the pile and read "Back around" when they return. The footer mirrors the buttons: skipped count left, one pink ✓ mark per done card right (earned marks only — no empty slots). An emptied stack reveals a pink burst sticker ("5 for 5 · Deal the next 5 →") where the pile was; it replaces the old Done screen (`Done.svelte` removed, the `done` phase is gone). The stack is bigger on desktop (54rem wide at ≥55rem, fluid title up to 4rem). Components: `Focus.svelte` (pile + ghost), `Card.svelte`, `Sticker.svelte`.
 - See `README.md` for stack/setup.
 
 ## Local development & deploy
@@ -37,10 +38,14 @@ Wrangler is currently v3.114 (devDependency pinned to `^3.0.0`); a v4 upgrade is
 - **Removed the manual Triage/checkbox screen entirely, replaced with fully automatic AI pick + rank.** The user's own framing: "I'm trying to minimize my failings, I can't pick what to do next, this is supposed to help me, so if I have to check a bunch of things... not helpful." Requiring a human to pre-select candidate tasks defeated the point of a tool built for someone who struggles with picking what's next — and it was already in tension with the "no visible task lists anywhere" design principle. `/api/sort` now receives every incomplete task (not a pre-filtered subset) and is explicitly prompted to both select and rank, returning at most 5.
 - **While testing the above, found and fixed two live bugs in `/api/sort`**: (1) the hardcoded `claude-sonnet-4-20250514` model id had been retired and was 404ing on every call — AI sorting had been silently failing back to a default/fallback order for an unknown stretch of time, invisible to the user because the frontend swallows sort errors and falls back gracefully; (2) `max_tokens: 1024` was tight enough that the model's extended-thinking tokens could crowd out the final JSON output, truncating it and intermittently triggering the same silent fallback even with a working model. Fixed with `claude-sonnet-5` and `max_tokens: 4096`; verified reliable across repeated runs with real data. Lesson: a fire-and-forget-style silent fallback (here, and in the known "Done" write issue above) can hide a completely broken feature for a long time — worth periodically testing the actual AI response path directly, not just checking that the UI doesn't error.
 
+- **Motion is in, for one idea: the card you just acted on.** It lingers ~1s as a "ghost" on top (stamp or tab lands, then it leaves toward the side of the button pressed) while the stack has already advanced underneath — so the Notion write fires at the click, not after the animation. Under `prefers-reduced-motion` the stamp/tab still shows and the card then simply disappears. Clicks are ignored while a ghost is up, so a double-tap can't complete two cards.
+- **Skipped is ink, done is pink.** Skipped markers (tab, footer key) use `--color-text`, not a second hue and not red — a neutral "come back to this," in keeping with no guilt mechanics. The footer counts cards currently skipped, not skip presses.
+- **Dealing the next stack waits for in-flight "Done" writes** (`pendingWrites` in `+page.svelte`), so a card checked off a second ago can't be re-dealt. The silent-failure issue below is unchanged.
+- **Hover styles are gated behind `@media (hover: hover)`** — on touch, hover stuck after a tap and the next card's Skip button rendered inverted.
+
 ## What is this?
 
-Read the full product spec in Notion first:
-https://www.notion.so/35455aa28d7181d7a1e8fc0466dc1cc2
+The full product spec lives in a private Notion page (link kept out of this public repo).
 
 "One Thing" is a personal executive functioning tool — a focusing lens that sits on top of a Notion task database and surfaces ONE task at a time. It's not a task manager. It pulls tasks from Notion, uses AI to sort them using 4 priority questions, and presents them as a visual card stack. You complete one, it shows you the next. The stack shrinks as you go.
 
@@ -54,8 +59,7 @@ https://www.notion.so/35455aa28d7181d7a1e8fc0466dc1cc2
 
 ## Key Notion details
 
-- Tasks database data source: `collection://13055aa2-8d71-81d2-aa64-000b8f7dbfac`
-- Database view URL: `https://app.notion.com/p/13055aa28d7181f6a5bbc0d59cc62ded?v=13055aa2-8d71-8155-a2f9-000cb5a2d29b`
+- The tasks database ID lives in `NOTION_DATABASE_ID` (`.env` / `.dev.vars` / Pages secrets) — never written into this repo, which is public.
 - Key fields: Name (title), Done (checkbox), Important (checkbox), Urgent (checkbox), Due Date (date), Effort (select), Impact (select), Time Estimate (select), Project (relation), Delegate To (multi_select)
 - To mark a task done: update the "Done" checkbox to "__YES__"
 
@@ -83,16 +87,14 @@ These seed the AI's sorting context.
 
 ### Focus screen
 - Shows ONE card at a time
-- Visual card stack behind it (3px offset per card, up to 8 visible)
+- Visual card pile behind it (3px offset per card plus each card's own slight tilt)
 - Stack shrinks as you complete tasks
-- "Your focus is protected. No email until task 1 is done."
-- ✓ Done button marks it done in Notion AND advances to next card
-- Skip button advances without marking done
+- ✓ Done (right) stamps the card, marks it done in Notion, advances to the next card
+- ← Skip (left) tabs the card and moves it to the back of the pile; it comes back around
 - Bridge belief mantras at bottom
 
-### Done screen
-- "Stack complete. X tasks done today. Everything else can wait."
-- Option to start a new stack
+### Stack complete
+- Not a separate screen: the last card leaves and a pink burst sticker is underneath — "5 for 5 · Deal the next 5 →" — which fetches and deals the next stack
 
 ## Design principles (from the product spec)
 

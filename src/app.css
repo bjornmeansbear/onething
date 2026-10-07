@@ -114,6 +114,13 @@
 		color: var(--color-text);
 		-webkit-font-smoothing: antialiased;
 	}
+
+	/* Deliberately visible focus ring, as in kit.css — never suppressed. */
+	a:focus-visible,
+	button:focus-visible {
+		outline: 0.25rem solid var(--color-accent);
+		outline-offset: 2px;
+	}
 }
 
 @layer components {
@@ -140,11 +147,25 @@
 		padding: 40px 32px;
 	}
 
+	/* The stack gets bigger on desktop — wider here, taller and larger type
+	   in Card.svelte. */
+	@media (min-width: 55rem) {
+		.win {
+			max-width: 54rem;
+		}
+
+		.win-footer {
+			font-size: 16px;
+		}
+	}
+
 	.win-footer {
 		padding: 16px 32px;
 		font-size: 14px;
 		color: var(--color-text-muted);
 		display: flex;
+		flex-wrap: wrap;
+		gap: 8px 16px;
 		justify-content: space-between;
 	}
 

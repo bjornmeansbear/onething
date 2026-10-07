@@ -196,7 +196,7 @@ export default function OneThing() {
           mcp_servers: [{ type: "url", url: "https://mcp.notion.com/mcp", name: "notion" }],
           messages: [{
             role: "user",
-            content: `Query the Notion database view at: https://app.notion.com/p/13055aa28d7181f6a5bbc0d59cc62ded?v=13055aa2-8d71-8155-a2f9-000cb5a2d29b\n\nReturn ONLY a JSON array of objects with: name, dueDate (or null), important (bool), urgent (bool), effort (string or null), impact (string or null). No markdown, no extra text.`,
+            content: `Query the Notion database view at: <your Notion database view URL>\n\nReturn ONLY a JSON array of objects with: name, dueDate (or null), important (bool), urgent (bool), effort (string or null), impact (string or null). No markdown, no extra text.`,
           }],
         }),
       });
