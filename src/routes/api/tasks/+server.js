@@ -1,5 +1,6 @@
 import { json, error } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
+import { byTier } from '$lib/priority.js';
 
 /** @type {import('./$types').RequestHandler} */
 export async function GET({ platform }) {
@@ -22,11 +23,7 @@ export async function GET({ platform }) {
 					{ property: 'Done', checkbox: { equals: false } }
 				]
 			},
-			sorts: [
-				{ property: 'Urgent', direction: 'descending' },
-				{ property: 'Important', direction: 'descending' },
-				{ timestamp: 'last_edited_time', direction: 'descending' }
-			],
+			sorts: [{ timestamp: 'last_edited_time', direction: 'descending' }],
 			page_size: 100,
 			...(cursor ? { start_cursor: cursor } : {})
 		};
@@ -66,5 +63,6 @@ export async function GET({ platform }) {
 		return { id: page.id, name, done, important, urgent, dueDate, effort, impact, timeEstimate };
 	});
 
-	return json(tasks);
+	// Tier order, so the first 5 are a sane stack even if the AI sort fails
+	return json(byTier(tasks));
 }

@@ -53,12 +53,22 @@ The app looks for these properties by exact name, capitals and spaces included.
 |---|---|---|---|
 | `Name` | Title | Yes | The text on the card |
 | `Done` | Checkbox | Yes | Only unchecked tasks load. **Done** checks it. |
-| `Urgent` | Checkbox | Yes | Sorts the Notion query. Passed to Claude. |
-| `Important` | Checkbox | Yes | Sorts the Notion query. Passed to Claude. |
-| `Due Date` | Date | No | Shown on the card. Passed to Claude. |
+| `Urgent` | Checkbox | Yes | Sets the deal order (below) |
+| `Important` | Checkbox | Yes | Sets the deal order (below) |
+| `Due Date` | Date | No | Shown on the card. Sets the deal order. Passed to Claude. |
 | `Effort` | Select | No | Passed to Claude |
 | `Impact` | Select | No | Passed to Claude |
 | `Time Estimate` | Select | No | Passed to Claude |
+
+Tasks are dealt in a fixed order, set in `src/lib/priority.js`:
+
+1. Important and urgent, with a due date
+2. Important and urgent
+3. Important only
+4. Urgent only
+5. Everything else
+
+A later group never comes up while an earlier one still has tasks. Claude only orders tasks inside a group, and picks which ones make the stack when a group has more than five.
 
 The three selects can hold any options you like. Claude reads the option names as written. Other properties in the database are ignored.
 
