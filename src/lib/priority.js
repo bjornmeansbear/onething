@@ -24,3 +24,11 @@ export function tier(task) {
 export function byTier(tasks) {
 	return [...tasks].sort((a, b) => tier(a) - tier(b));
 }
+
+// The order without the AI: tier first, then the soonest due date (undated
+// last), then the order they came in. The sort falls back to this whenever
+// the AI is unavailable, so the stack still respects the tiers.
+export function byUrgency(tasks) {
+	const due = (t) => (t.dueDate ? Date.parse(t.dueDate) : Infinity);
+	return [...tasks].sort((a, b) => tier(a) - tier(b) || due(a) - due(b));
+}

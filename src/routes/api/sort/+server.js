@@ -1,17 +1,12 @@
 import { json, error } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
-import { tier, TIER_LABELS } from '$lib/priority.js';
+import { tier, byUrgency, TIER_LABELS } from '$lib/priority.js';
 
 const STACK_SIZE = 5;
 
 /** @type {import('./$types').RequestHandler} */
 export async function POST({ request, platform }) {
 	const apiKey = platform?.env?.ANTHROPIC_API_KEY ?? env.ANTHROPIC_API_KEY;
-
-	if (!apiKey) {
-		throw error(500, 'Missing Anthropic API key');
-	}
-
 	const { tasks, context } = await request.json();
 
 	if (!tasks?.length) {
@@ -20,11 +15,19 @@ export async function POST({ request, platform }) {
 
 	// Tier order is enforced here, not left to the AI. It only sees the tiers
 	// that can reach the stack: every tier down to the one holding the 5th task.
-	const ranked = tasks
-		.map((t, i) => ({ ...t, index: i + 1, tier: tier(t) }))
-		.sort((a, b) => a.tier - b.tier);
+	// byUrgency: tier, then soonest due date. That is also the whole answer
+	// when the AI can't be reached (no key, out of credits, API down) — the
+	// stack never depends on the AI to exist, only to be better ordered.
+	const ranked = byUrgency(tasks.map((t, i) => ({ ...t, index: i + 1, tier: tier(t) })));
 	const cutoff = ranked[Math.min(STACK_SIZE, ranked.length) - 1].tier;
 	const pool = ranked.filter((t) => t.tier <= cutoff);
+	const withoutAI = () =>
+		json({ ai: false, picks: pool.slice(0, STACK_SIZE).map(({ index }) => ({ index, reason: '' })) });
+
+	if (!apiKey) {
+		console.error('sort: no ANTHROPIC_API_KEY — sorting by tier and due date');
+		return withoutAI();
+	}
 
 	const taskList = pool
 		.map(
@@ -59,23 +62,32 @@ ${taskList}
 Return ONLY a JSON array of ${Math.min(STACK_SIZE, pool.length)} tasks, sorted highest priority first, using the task numbers exactly as given: [{"index": 1, "reason": "one short phrase"}, ...]
 No markdown, no extra text, no explanation outside the JSON.`;
 
-	const res = await fetch('https://api.anthropic.com/v1/messages', {
-		method: 'POST',
-		headers: {
-			'x-api-key': apiKey,
-			'anthropic-version': '2023-06-01',
-			'content-type': 'application/json'
-		},
-		body: JSON.stringify({
-			model: 'claude-sonnet-5',
-			max_tokens: 4096,
-			messages: [{ role: 'user', content: prompt }]
-		})
-	});
+	let res;
+	try {
+		res = await fetch('https://api.anthropic.com/v1/messages', {
+			method: 'POST',
+			headers: {
+				'x-api-key': apiKey,
+				'anthropic-version': '2023-06-01',
+				'content-type': 'application/json'
+			},
+			// Haiku: picking and ordering five tasks under strict rules is light
+			// work, and the API credit is a monthly allowance worth stretching.
+			// Five indexes and short phrases fit easily in 512 tokens.
+			body: JSON.stringify({
+				model: 'claude-haiku-5-5',
+				max_tokens: 512,
+				messages: [{ role: 'user', content: prompt }]
+			})
+		});
+	} catch (e) {
+		console.error('sort: Anthropic API unreachable — sorting by tier and due date', e);
+		return withoutAI();
+	}
 
 	if (!res.ok) {
-		const text = await res.text();
-		throw error(502, `Anthropic API error: ${res.status} ${text}`);
+		console.error(`sort: Anthropic API ${res.status} — sorting by tier and due date`, await res.text());
+		return withoutAI();
 	}
 
 	const data = await res.json();
@@ -94,7 +106,8 @@ No markdown, no extra text, no explanation outside the JSON.`;
 		}
 	}
 
-	// Tier first, then the AI's order; anything it left out trails its tier.
+	// Tier first, then the AI's order; anything it left out trails its tier
+	// in due-date order (pool is already sorted that way, and sort is stable).
 	// So even a wrong or empty answer can't put a lower tier ahead of a higher one.
 	const rank = new Map(picks.map((p, i) => [p.index, { at: i, reason: p.reason ?? '' }]));
 	const order = pool
@@ -103,5 +116,5 @@ No markdown, no extra text, no explanation outside the JSON.`;
 		.slice(0, STACK_SIZE)
 		.map(({ index, reason }) => ({ index, reason }));
 
-	return json(order);
+	return json({ ai: true, picks: order });
 }

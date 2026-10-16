@@ -5,6 +5,7 @@
 	import Loading from '$lib/components/Loading.svelte';
 	import Sorting from '$lib/components/Sorting.svelte';
 	import Focus from '$lib/components/Focus.svelte';
+	import { byUrgency } from '$lib/priority.js';
 
 	// ── phases: loading → sorting → focus
 	// (an emptied stack stays in focus: the sticker under the pile deals the next one)
@@ -28,7 +29,9 @@
 
 	// Errors
 	let loadError = '';
-	let sortError = '';
+	// Set when the stack was sorted without the AI (unreachable, out of credit):
+	// still tier-ordered, just not hand-ranked within a tier.
+	let sortNote = '';
 
 	// Mantras rotate
 	let mantraIdx = 0;
@@ -56,7 +59,7 @@
 
 	async function buildStack() {
 		phase = 'sorting';
-		sortError = '';
+		sortNote = '';
 		try {
 			const res = await fetch('/api/sort', {
 				method: 'POST',
@@ -64,13 +67,16 @@
 				body: JSON.stringify({ tasks })
 			});
 			if (!res.ok) throw new Error(await res.text());
-			const order = await res.json();
+			const { ai, picks } = await res.json();
+			if (!ai) sortNote = 'Sorted by priority — AI ranking is off right now';
 			// Ignore any pick that doesn't point at a real task
-			const picks = order.filter((x) => tasks[x.index - 1]);
-			stack = deal(picks.map((x) => ({ ...tasks[x.index - 1], reason: x.reason })));
+			const real = picks.filter((x) => tasks[x.index - 1]);
+			stack = deal(real.map((x) => ({ ...tasks[x.index - 1], reason: x.reason })));
 		} catch (e) {
-			sortError = e.message ?? 'Sort failed — showing the first 5 instead.';
-			stack = deal(tasks.slice(0, 5).map((t) => ({ ...t, reason: '' })));
+			// The sort endpoint itself failed: same tier + due-date order, here.
+			console.error('sort failed', e);
+			sortNote = 'Sorted by priority — AI ranking is off right now';
+			stack = deal(byUrgency(tasks).slice(0, 5).map((t) => ({ ...t, reason: '' })));
 		}
 		doneCount = 0;
 		mantraIdx = Math.floor(Math.random() * MANTRAS.length);
@@ -123,7 +129,7 @@
 	{/if}
 
 	{#if phase === 'sorting'}
-		<Window><Sorting {sortError} /></Window>
+		<Window><Sorting /></Window>
 	{/if}
 
 	{#if phase === 'focus'}
@@ -131,6 +137,9 @@
 			<Focus {stack} {doneCount} {mantraText} onAdvance={advance} onNext={startNewStack} />
 			<!-- Skipped on the left, done on the right — same sides as the buttons -->
 			<svelte:fragment slot="footer">
+				{#if sortNote}
+					<span class="tally">{sortNote}</span>
+				{/if}
 				{#if skippedCount}
 					<span class="tally">
 						<span class="tab-key" aria-hidden="true"></span>
