@@ -2,8 +2,14 @@
 
 ## Status (updated as we go)
 
+- **v0.1.0 (2026-10-19) — first tagged version.** The look moved from "plain black-and-white" to a deliberate OOKB/Wjerk direction, borrowed from oblique.ookb.co. Still provisional — expect it to change — but it's a real design now, not a placeholder:
+  - **Two grounds.** The page is Wjerk Med Gray (`--color-bg`, #858479) inside a fixed Wjerk Dark Gray frame; cards are `yellow-0` (`--color-card`). The pile behind steps `yellow-1`…`yellow-4`, one per card back. Skip tabs run `brown-9` (farthest-back tab) to `brown-6`, a step lighter per tab forward.
+  - **Contrast on the gray is tight**, so the tokens say where text sits: `--color-ground-text` (`brown-9`, 5.39:1) for anything on the gray, `--color-text` / `--color-text-muted` only on cards, `--color-on-fill` for light type on pink/dark fills. No muted tone passes on the gray (gray-6 is 2.07:1). The focus ring is `brown-9`, not pink — pink-5 is 1.34:1 on this gray.
+  - **Interaction:** either arrow key skips (Done stays click-only, it writes to Notion); every card holds the height of the tallest one dealt, so the layout doesn't jump; "AI off" and the done count sit in the bottom corners as small text. The footer and the "N skipped" tally are gone — the tabs show it.
+  - **Cleanup:** dead code out (palette.css, Sorting.svelte, the Mac-chrome Tailwind extras, window titlebar/footer, unused tokens and helpers). `npm run check` works now (0 errors). `one-thing-prototype.jsx` deleted — recover with `git show a5c0533:one-thing-prototype.jsx`.
+  - Design findings from this pass are recorded in `~/Code/color-system-and-guidelines` (NOTES.md 2026-10-19), including the original Wjerk colors now being exact `--wjerk-*` tokens.
 - Done: scaffold, Notion read/write, triage screen, AI sorting, focus screen + card stack, onboarding questions (build priorities 1–6).
-- Done: color palette — OKLCH scales + semantic tokens (`--color-bg`, `--color-accent`, etc.) live in `src/app.css`, applied throughout `+page.svelte`. Accent (pink) used on primary CTAs and the "focus protected" banner; URGENT badge intentionally left black/white (no red badges, per design principles). See `palette-docs.html` for the reference tool this was derived from.
+- Done: color palette — OKLCH scales + semantic tokens (`--color-bg`, `--color-accent`, etc.) live in `src/app.css`, applied throughout `+page.svelte`. Accent (pink) used on primary CTAs and the "focus protected" banner; URGENT badge intentionally left black/white (no red badges, per design principles). *(Superseded by v0.1.0: palette-docs.html is gone and the tokens were reworked for the gray ground — see the v0.1.0 entry.)*
 - Done: visual style moved away from literal Mac OS 9 chrome — plain system font (no bitmap typeface), no title-bar/dot/shadow, bigger type, more whitespace, structure carried by solid black rules instead of boxed "windows." Reference points: bjornpaedia.wjerk.shop and a.wjerk.shop (plain sans-serif, thin black rules, no decoration). Muted/subtle text tokens were also fixed — they were failing WCAG AA (as low as 2.7:1) against the light background; `--color-text-muted` is now gray-6 (7.3:1) and all borders/dividers use `--color-text` (near-black) instead of pale grays, since low-contrast gray-on-gray was flagged as a real accessibility problem, not just a style note.
 - Done: PWA icons — `icon-192.png`, `icon-512.png`, `apple-touch-icon.png` (180×180), `favicon.png` + `favicon.svg` all live in `static/`, wired into `manifest.json` and `app.html`. No service worker yet (not required for install/home-screen use).
 - Done: `+page.svelte` split into modular components under `src/lib/components/` (`Window`, `Onboarding`, `Loading`, `Sorting`, `Focus`, `Done`) — the page itself is now just the phase state machine + API calls, composed with `<Window>` per phase.
@@ -11,7 +17,7 @@
 - Done: **removed the manual Triage/checkbox screen entirely** — onboarding now goes straight into the AI picking *and* ranking from every incomplete Notion task, landing directly on Focus. See App flow and Decisions log below for why.
 - Done: fixed two real bugs in `/api/sort` found while testing the above — the hardcoded model id (`claude-sonnet-4-20250514`) had been retired (404), so AI sorting had likely been silently falling back to default order for a while; and `max_tokens: 1024` was too tight once the model's extended-thinking tokens are counted against it, intermittently truncating the JSON response. Now `claude-sonnet-5` at `max_tokens: 4096`, verified reliable across repeated runs.
 - Done: added 5 new mantras to `mantras.js` sourced from the user's own affirmations notes (curated for the "just do the one thing" voice, not the broader self-help material also found there).
-- Done (2026-10-07): **the pile, the stamp, the tabs, the sticker.** Cards are a tilted pile now (each card keeps a random 1.5–4° tilt, alternating sides; the front card shows 30% of its own). Done slaps a pink "✓ DONE" sticker on the card's right corner before it flies off right; Skip pops a dark "SKIPPED" folder tab on the left and the card slides off left to the back. Skipped cards keep their tab in the pile and read "Back around" when they return. The footer mirrors the buttons: skipped count left, one pink ✓ mark per done card right (earned marks only — no empty slots). An emptied stack reveals a pink burst sticker ("5 for 5 · Deal the next 5 →") where the pile was; it replaces the old Done screen (`Done.svelte` removed, the `done` phase is gone). The stack is bigger on desktop (54rem wide at ≥55rem, fluid title up to 4rem). Components: `Focus.svelte` (pile + ghost), `Card.svelte`, `Sticker.svelte`.
+- Done (2026-10-07): **the pile, the stamp, the tabs, the sticker.** Cards are a tilted pile now (each card keeps a random 1.5–4° tilt, alternating sides; the front card shows 30% of its own). Done slaps a pink "✓ DONE" sticker on the card's right corner before it flies off right; Skip pops a dark "SKIPPED" folder tab on the left and the card slides off left to the back. Skipped cards keep their tab in the pile and read "Back around" when they return. *(Footer removed in v0.1.0 — done count is corner text now.)* An emptied stack reveals a pink burst sticker ("5 for 5 · Deal the next 5 →") where the pile was; it replaces the old Done screen (`Done.svelte` removed, the `done` phase is gone). The stack is bigger on desktop (54rem wide at ≥55rem, fluid title up to 4rem). Components: `Focus.svelte` (pile + ghost), `Card.svelte`, `Sticker.svelte`, `Loading.svelte` (loading / sorting / empty / error), `Window.svelte` (centering wrapper).
 - See `README.md` for stack/setup.
 
 ## Local development & deploy
@@ -32,15 +38,15 @@ Wrangler is currently v3.114 (devDependency pinned to `^3.0.0`); a v4 upgrade is
 ## Decisions log
 
 - **Docs live in `README.md` (setup/stack) + this file's Status section (current build state)** rather than a separate docs file — avoids doc sprawl since this handoff doc already existed with a build-priorities checklist.
-- **Color palette accent (pink-5/6) applied to primary CTAs and the "focus protected" banner only** — everything else relies on the near-black text/border color, not additional hues. The `palette-*.html` files in the repo root are a scratch OKLCH color-scale generator (saved from an earlier `/tmp` session, not derived from any external design system) — `palette-docs.html`'s semantic token table is the source of truth for what each `--color-*` variable in `src/app.css` maps to.
+- **Color tokens live in `src/app.css` and mirror `~/Code/color-system-and-guidelines/kit.css`** — that repo is the source of truth for the ramps and the `--wjerk-*` originals. Pink (`--color-accent`) is for the Done button, the done stamp and the sticker; everything else is ink. (The old `palette-*.html` scratch files are gone.)
 - **URGENT badge kept plain black/white, not red** — the design principles explicitly rule out red badges/guilt mechanics, so this stayed monochrome even after the accent color was introduced elsewhere.
-- **Dropped the literal Mac OS 9 window chrome (bitmap font, title-bar gradient, dot, drop shadow) in favor of a plainer look** — plain system font, bigger type, generous whitespace, black rules/borders instead of boxed chrome. Also collapsed `--color-surface`/`--color-surface-2` down to the same value as `--color-bg`, and `--color-border`/`--color-border-subtle` down to `--color-text` — the previous pale-gray borders and mid-gray "muted"/"subtle" text were real WCAG failures (as low as 1.2:1 for borders, 2.7:1 for subtle text against the light background), not just a style preference. If adding new UI, keep text/border colors to `--color-text` (near-black) or `--color-text-muted` (gray-6, 7.3:1) — don't reintroduce mid-gray (gray-3/4/5) as text or border color against this background.
+- **Dropped the literal Mac OS 9 window chrome (bitmap font, title-bar gradient, dot, drop shadow) in favor of a plainer look** — plain system font, bigger type, generous whitespace, black rules/borders instead of boxed chrome. Also collapsed `--color-surface`/`--color-surface-2` down to the same value as `--color-bg`, and `--color-border`/`--color-border-subtle` down to `--color-text` — the previous pale-gray borders and mid-gray "muted"/"subtle" text were real WCAG failures (as low as 1.2:1 for borders, 2.7:1 for subtle text against the light background), not just a style preference. If adding new UI: on a card, use `--color-text` or `--color-text-muted` (gray-6, 7.3:1 on yellow-0); on the gray ground, use `--color-ground-text` only — nothing lighter passes there. Measure before adding any new pairing.
 - **Removed the manual Triage/checkbox screen entirely, replaced with fully automatic AI pick + rank.** The user's own framing: "I'm trying to minimize my failings, I can't pick what to do next, this is supposed to help me, so if I have to check a bunch of things... not helpful." Requiring a human to pre-select candidate tasks defeated the point of a tool built for someone who struggles with picking what's next — and it was already in tension with the "no visible task lists anywhere" design principle. `/api/sort` now receives every incomplete task (not a pre-filtered subset) and is explicitly prompted to both select and rank, returning at most 5.
-- **Tier order is a hard rule in code, not an AI judgement call** (2026-10-07). The flags used to be passed to the AI as hints next to "can I finish this in one sitting?", so it would pass over big or vaguely-named important+urgent tasks for quick important-only emails. The user's rule: important+urgent with a due date first, then important+urgent, then important only, then urgent only, then the rest. `/api/sort` now only shows the AI the tiers that can reach the stack and re-sorts its answer by tier, so a bad or empty AI reply still yields a correct stack. `/api/tasks` returns tasks in the same order for the client-side fallback.
+- **Tier order is a hard rule in code, not an AI judgement call** (2026-10-07). The flags used to be passed to the AI as hints next to "can I finish this in one sitting?", so it would pass over big or vaguely-named important+urgent tasks for quick important-only emails. The user's rule: important+urgent with a due date first, then important+urgent, then important only, then urgent only, then the rest. `/api/sort` now only shows the AI the tiers that can reach the stack and re-sorts its answer by tier, so a bad or empty AI reply still yields a correct stack. If `/api/sort` itself fails, the client falls back to the same order with `byUrgency` from `priority.js`.
 - **While testing the above, found and fixed two live bugs in `/api/sort`**: (1) the hardcoded `claude-sonnet-4-20250514` model id had been retired and was 404ing on every call — AI sorting had been silently failing back to a default/fallback order for an unknown stretch of time, invisible to the user because the frontend swallows sort errors and falls back gracefully; (2) `max_tokens: 1024` was tight enough that the model's extended-thinking tokens could crowd out the final JSON output, truncating it and intermittently triggering the same silent fallback even with a working model. Fixed with `claude-sonnet-5` and `max_tokens: 4096`; verified reliable across repeated runs with real data. Lesson: a fire-and-forget-style silent fallback (here, and in the known "Done" write issue above) can hide a completely broken feature for a long time — worth periodically testing the actual AI response path directly, not just checking that the UI doesn't error.
 
 - **Motion is in, for one idea: the card you just acted on.** It lingers ~1s as a "ghost" on top (stamp or tab lands, then it leaves toward the side of the button pressed) while the stack has already advanced underneath — so the Notion write fires at the click, not after the animation. Under `prefers-reduced-motion` the stamp/tab still shows and the card then simply disappears. Clicks are ignored while a ghost is up, so a double-tap can't complete two cards.
-- **Skipped is ink, done is pink.** Skipped markers (tab, footer key) use `--color-text`, not a second hue and not red — a neutral "come back to this," in keeping with no guilt mechanics. The footer counts cards currently skipped, not skip presses.
+- **Skipped is ink, done is pink.** Skip tabs are brown ink, not a second hue and not red — a neutral "come back to this," in keeping with no guilt mechanics.
 - **Dealing the next stack waits for in-flight "Done" writes** (`pendingWrites` in `+page.svelte`), so a card checked off a second ago can't be re-dealt. The silent-failure issue below is unchanged.
 - **Hover styles are gated behind `@media (hover: hover)`** — on touch, hover stuck after a tap and the next card's Skip button rendered inverted.
 
@@ -54,9 +60,9 @@ The full product spec lives in a private Notion page (link kept out of this publ
 
 - SvelteKit + Tailwind CSS
 - Notion API for read/write (tasks database)
-- Claude API (`claude-sonnet-5`) for AI-powered task picking + sorting
+- Claude API (`claude-haiku-5-5`) for AI-powered task picking + sorting — light work under strict rules, and the API credit is a monthly allowance
 - Mobile-first PWA (needs to work on phone home screen)
-- Aesthetic: plain, black-and-white, functional, no visual fluff — originally modeled on Mac OS 9 Finder chrome, since simplified toward a plainer look (see Decisions log); "no visual fluff" still holds
+- Aesthetic: OOKB/Wjerk — Med Gray ground, yellow cards, brown ink, pink for done (see v0.1.0 in Status). Started as Mac OS 9 Finder chrome, then plain black-and-white; "no visual fluff" still holds
 
 ## Key Notion details
 
@@ -73,16 +79,12 @@ The full product spec lives in a private Notion page (link kept out of this publ
 
 ## App flow
 
-### Onboarding (start of session)
-Ask 3 quick questions, then go straight into building the stack — no manual task selection:
-- "Is there anything you already know is important today?"
-- "What meetings do you have today?"
-- "Anything from yesterday you didn't get to?"
-These seed the AI's sorting context.
+### Onboarding
+Removed — opening the app goes straight to loading and sorting, with no questions first. (It used to ask three questions to seed the AI's context; the sort endpoint no longer takes that context.)
 
 ### Loading → Sorting (fully automatic)
 - Pull ALL incomplete tasks from Notion (no user pre-filtering — this used to be a manual checkbox "Triage" screen, removed; see Decisions log)
-- Send everything to the AI along with the onboarding answers
+- Send everything to the AI
 - Tasks are dealt in a fixed tier order (`src/lib/priority.js`): important+urgent with a due date → important+urgent → important only → urgent only → everything else. Code enforces it; a lower tier never appears while a higher one has tasks left
 - AI picks and ranks only *within* a tier (and chooses which make the cut when a tier overflows the stack of 5)
 - Lands directly on the Focus screen — no button to press in between
@@ -94,6 +96,7 @@ These seed the AI's sorting context.
 - ✓ Done (right) stamps the card, marks it done in Notion, advances to the next card
 - ← Skip (left) tabs the card and moves it to the back of the pile; it comes back around
 - Bridge belief mantras at bottom
+- Either arrow key skips; Done is click-only
 
 ### Stack complete
 - Not a separate screen: the last card leaves and a pink burst sticker is underneath — "5 for 5 · Deal the next 5 →" — which fetches and deals the next stack
@@ -110,7 +113,7 @@ These seed the AI's sorting context.
 
 ## Reference prototype
 
-See `one-thing-prototype.jsx` — this is a working React prototype built during our design session. Use it as a reference for the UI behavior and card stack component, but rebuild everything in SvelteKit + Tailwind.
+The original React prototype (`one-thing-prototype.jsx`) was deleted in v0.1.0 — everything it showed is rebuilt in SvelteKit. It's still in git: `git show a5c0533:one-thing-prototype.jsx`.
 
 ## Build priorities (in order)
 
@@ -125,7 +128,7 @@ See `one-thing-prototype.jsx` — this is a working React prototype built during
 
 ## Known issues (not fixed yet)
 
-- **Silent failure on "Done" write to Notion** — `advance(true)` in `+page.svelte` fires `POST /api/done` as fire-and-forget (`.catch(() => {})`) so the card always advances immediately without waiting on the Notion write. If that PATCH fails (bad token, network blip, rate limit), the task disappears from the local stack but stays unchecked in Notion, with no error shown. Worth adding a retry or at least a visible failure indicator (e.g. a quiet toast, or a locally-queued retry) before this becomes a trust problem.
+- **Quiet failure on "Done" write to Notion** — `advance(true)` in `+page.svelte` fires `POST /api/done` as fire-and-forget so the card always advances immediately. If that PATCH fails (bad token, network blip, rate limit), the task stays unchecked in Notion and comes back in a later stack. Since v0.1.0 the failure is logged to the console, but nothing is shown to the user. Worth adding a retry or at least a visible failure indicator (e.g. a quiet toast, or a locally-queued retry) before this becomes a trust problem.
 
 ## Future features (not now)
 
