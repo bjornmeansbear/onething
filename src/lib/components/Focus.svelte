@@ -50,7 +50,31 @@
 	}
 
 	onDestroy(() => clearTimeout(ghostTimer));
+
+	// Every card dealt this round, kept even after it's done, so the pile
+	// holds the height of the tallest one and never jumps between cards.
+	// Cleared when the stack runs out, ready for the next deal.
+	let dealt = [];
+	$: track(stack);
+	function track(s) {
+		if (!s.length) return (dealt = []);
+		const seen = new Set(dealt.map((c) => c.id));
+		const fresh = s.filter((c) => !seen.has(c.id));
+		if (fresh.length) dealt = [...dealt, ...fresh];
+	}
+
+	// Either arrow skips. Done stays a deliberate click — it writes to Notion.
+	function onKey(e) {
+		if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+		if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || e.repeat) return;
+		if (e.target.closest?.('input, textarea, select, [contenteditable]')) return;
+		if (!stack[0] || ghost) return;
+		e.preventDefault();
+		act('skip');
+	}
 </script>
+
+<svelte:window on:keydown={onKey} />
 
 <div class="pile" class:front-tabbed={stack[0]?.skipped}>
 	{#if stack[0]}
@@ -63,6 +87,12 @@
 					<span class="tab" style="--nth: {nth};"></span>
 				{/if}
 			</div>
+		{/each}
+
+		<!-- Invisible copies in the front card's grid cell: the cell sizes to
+		     the tallest, and the front card stretches to fill it. -->
+		{#each dealt as card (card.id)}
+			<div class="sizer" inert aria-hidden="true"><Card {card} /></div>
 		{/each}
 
 		<div class="front" style="--tilt: {stack[0].tilt}deg; --tab-ground: {tabInk(0)};">
@@ -88,6 +118,7 @@
 	/* Room above for skipped tabs and the tilted corners of the pile. */
 	.pile {
 		position: relative;
+		display: grid;
 		margin-top: 1.5rem;
 		margin-bottom: min(4.5rem, 1rem + 4vw);
 		/* blank tabs start after the front card's lettered one, if it has one */
@@ -106,8 +137,21 @@
 		transform-origin: 25% 0;
 	}
 
+	.front,
+	.sizer {
+		grid-area: 1 / 1;
+	}
+
+	.sizer {
+		visibility: hidden;
+	}
+
 	.front {
 		transform: rotate(calc(var(--tilt) * 0.3));
+	}
+
+	.ghost .front {
+		height: 100%;
 	}
 
 	.under {
@@ -134,7 +178,7 @@
 
 	.ghost {
 		position: absolute;
-		inset: 0 0 auto;
+		inset: 0;
 		animation: var(--leave) ease-in forwards;
 	}
 

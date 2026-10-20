@@ -21,7 +21,6 @@
 	// it to the back instead of dropping it, flagged, so it comes back around.
 	let stack = [];
 	let doneCount = 0;
-	$: skippedCount = stack.filter((c) => c.skipped).length;
 
 	// Notion writes still in flight — dealing the next stack waits on these,
 	// so a card just checked off can't be dealt again.
@@ -135,71 +134,43 @@
 	{#if phase === 'focus'}
 		<Window>
 			<Focus {stack} {doneCount} {mantraText} onAdvance={advance} onNext={startNewStack} />
-			<!-- Skipped on the left, done on the right — same sides as the buttons -->
-			<svelte:fragment slot="footer">
-				{#if sortNote}
-					<span class="tally">{sortNote}</span>
-				{/if}
-				{#if skippedCount}
-					<span class="tally">
-						<span class="tab-key" aria-hidden="true"></span>
-						{skippedCount} skipped, coming back around
-					</span>
-				{/if}
-				{#if doneCount}
-					<span class="tally ml-auto">
-						{#each Array(doneCount) as _}
-							<span class="mark" aria-hidden="true">✓</span>
-						{/each}
-						{doneCount} done
-					</span>
-				{/if}
-			</svelte:fragment>
 		</Window>
+	{/if}
+
+	<!-- Status pinned to the bottom corners, out of the cards' way: how the
+	     stack was sorted on the left, done count on the right — the side the
+	     Done button and the leaving card go. -->
+	{#if sortNote}
+		<p class="corner corner-left" role="status">AI off · sorted by priority instead</p>
+	{/if}
+	{#if phase === 'focus' && doneCount}
+		<p class="corner corner-right">{doneCount} done</p>
 	{/if}
 
 </div>
 
 <style>
-	.tally {
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
+	/* Secondary text, not chrome: no box, just the muted color (gray-6,
+	   7.3:1 on the ground). */
+	.corner {
+		position: fixed;
+		bottom: max(1rem, env(safe-area-inset-bottom));
+		z-index: 10;
+		margin: 0;
+		font-size: 0.8125rem;
+		line-height: 1.125rem;
+		color: var(--color-text-muted);
+		/* ground behind it so a card scrolled underneath can't show through */
+		background: var(--color-bg);
 	}
 
-	.tab-key {
-		width: 1rem;
-		height: 0.75rem;
-		background: var(--color-text);
+	.corner-left {
+		left: max(1rem, env(safe-area-inset-left));
+		/* leave room for the done count on narrow phones */
+		max-width: calc(100% - 8rem);
 	}
 
-	/* One mark per card done — only ever earned ones, never empty slots. */
-	.mark {
-		display: grid;
-		place-items: center;
-		width: 1.5rem;
-		height: 1.5rem;
-		background: var(--color-accent);
-		color: var(--color-bg);
-		font-weight: bold;
-		transform: rotate(-7deg);
-		animation: mark-on 220ms cubic-bezier(0.2, 1.4, 0.4, 1) 150ms backwards;
-	}
-
-	.mark:nth-child(even) {
-		transform: rotate(6deg);
-	}
-
-	@keyframes mark-on {
-		from {
-			opacity: 0;
-			scale: 2.4;
-		}
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.mark {
-			animation: none;
-		}
+	.corner-right {
+		right: max(1rem, env(safe-area-inset-right));
 	}
 </style>

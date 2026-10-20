@@ -24,7 +24,7 @@
 	</div>
 
 	<div class="actions">
-		<button class="skip" on:click={onSkip}>← Skip</button>
+		<button class="skip" on:click={onSkip} aria-keyshortcuts="ArrowLeft ArrowRight">← Skip</button>
 		<button class="done" on:click={onDone}>✓ Done</button>
 	</div>
 
@@ -34,13 +34,19 @@
 </div>
 
 <style>
+	/* Fills whatever height the pile gives it (the tallest card's); the
+	   extra space goes to the body, so the buttons stay at the bottom. */
 	.card {
 		position: relative;
+		display: flex;
+		flex-direction: column;
+		height: 100%;
 		border: 2px solid var(--color-text);
 		background: var(--yellow-0);
 	}
 
 	.body {
+		flex: 1;
 		padding: 2.5rem;
 	}
 
