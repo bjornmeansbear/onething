@@ -4,6 +4,7 @@
 	import Sticker from './Sticker.svelte';
 
 	export let stack;
+	export let hand; // every card dealt this round — sizes the pile
 	export let doneCount;
 	export let mantraText;
 	export let onAdvance;
@@ -29,11 +30,12 @@
 		}))
 		.reverse();
 
-	// Skip-tab ink, counted among the tabs from the back: the farthest-back
-	// tab is brown-9, each tab in front of it a step lighter, never below
-	// brown-6. depth is the card's index in the stack (front = 0).
-	$: tabInk = (depth) =>
-		`var(--brown-${Math.max(9 - stack.slice(depth + 1).filter((c) => c.skipped).length, 6)})`;
+	// Skip-tab ink per stack position, counted among the tabs from the back:
+	// the farthest-back tab is brown-9, each tab in front of it a step
+	// lighter, never below brown-6.
+	$: tabInk = stack.map(
+		(_, i) => `var(--brown-${Math.max(9 - stack.slice(i + 1).filter((c) => c.skipped).length, 6)})`
+	);
 
 	async function act(mark) {
 		if (ghost) return;
@@ -50,18 +52,6 @@
 	}
 
 	onDestroy(() => clearTimeout(ghostTimer));
-
-	// Every card dealt this round, kept even after it's done, so the pile
-	// holds the height of the tallest one and never jumps between cards.
-	// Cleared when the stack runs out, ready for the next deal.
-	let dealt = [];
-	$: track(stack);
-	function track(s) {
-		if (!s.length) return (dealt = []);
-		const seen = new Set(dealt.map((c) => c.id));
-		const fresh = s.filter((c) => !seen.has(c.id));
-		if (fresh.length) dealt = [...dealt, ...fresh];
-	}
 
 	// Either arrow skips. Done stays a deliberate click — it writes to Notion.
 	function onKey(e) {
@@ -81,7 +71,7 @@
 		{#each under as { card, depth, nth }}
 			<div
 				class="under"
-				style="--tilt: {card.tilt}deg; --depth: {depth}; --ground: var(--yellow-{Math.min(depth, 4)}); --tab-ground: {tabInk(depth)};"
+				style="--tilt: {card.tilt}deg; --depth: {depth}; --fill: var(--yellow-{Math.min(depth, 4)}); --tab-ground: {tabInk[depth]};"
 			>
 				{#if card.skipped}
 					<span class="tab" style="--nth: {nth};"></span>
@@ -89,13 +79,14 @@
 			</div>
 		{/each}
 
-		<!-- Invisible copies in the front card's grid cell: the cell sizes to
-		     the tallest, and the front card stretches to fill it. -->
-		{#each dealt as card (card.id)}
+		<!-- Invisible copies of the whole hand in the front card's grid cell:
+		     the cell sizes to the tallest card dealt, done ones included, and
+		     the front card stretches to fill it — so the pile never jumps. -->
+		{#each hand as card (card.id)}
 			<div class="sizer" inert aria-hidden="true"><Card {card} /></div>
 		{/each}
 
-		<div class="front" style="--tilt: {stack[0].tilt}deg; --tab-ground: {tabInk(0)};">
+		<div class="front" style="--tilt: {stack[0].tilt}deg; --tab-ground: {tabInk[0]};">
 			<Card card={stack[0]} onSkip={() => act('skip')} onDone={() => act('done')} />
 		</div>
 	{:else}
@@ -159,9 +150,10 @@
 		position: absolute;
 		inset: 0;
 		border: 2px solid var(--color-text);
-		/* front card is yellow-0 (Card.svelte); yellow-1 just behind it, a step
-		   deeper per card back, stopping at yellow-4 (yellow-5 drops the border to ~3:1) */
-		background: var(--ground);
+		/* front card is --color-card (yellow-0); yellow-1 just behind it, a
+		   step deeper per card back, stopping at yellow-4 (yellow-5 drops the
+		   border to ~3:1) */
+		background: var(--fill);
 		transform: translate(var(--drop), var(--drop)) rotate(var(--tilt));
 	}
 

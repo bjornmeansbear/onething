@@ -91,29 +91,23 @@
     --wjerk-navy: #2C416B;             --wjerk-purple: #A38DA1;
     --wjerk-purple-gray: #777783;
 
-    /* semantic tokens — see palette-docs.html for the source mapping.
-       text-muted is gray-6 (7.3:1 on --color-bg), not gray-5 (4.35:1, fails AA) —
-       gray-4/gray-5 read fine as isolated swatches but fail as text on this bg. */
-    --color-bg: var(--wjerk-white);
+    /* semantic tokens. Two grounds: the page is Wjerk Med Gray, the cards
+       are yellow-0 (oblique's pairing). Anything sitting on the gray has to
+       pass on the gray — measured on #858479:
+         ground-text brown-9   5.39:1   (wjerk-black is only 3.86, gray-6 2.07)
+         focus ring  brown-9   5.39:1   (pink-5 is 1.34 — invisible here)
+       So there is no muted tone on the ground; quiet text there is quiet by
+       size or italics, not by a lighter color. text-muted (gray-6) is for
+       the cards only (7.3:1 on yellow-0). */
+    --color-bg: var(--wjerk-med-gray);
     --color-card: var(--yellow-0);
-    --color-surface: var(--wjerk-white);
-    --color-surface-2: var(--wjerk-white);
-    --color-border: var(--color-text);
-    --color-border-subtle: var(--color-text);
+    --color-ground-text: var(--brown-9);
+    --color-on-fill: var(--wjerk-white); /* light type on pink/dark fills */
+    --color-focus: var(--brown-9);
     --color-text: var(--wjerk-black);
     --color-text-muted: var(--gray-6);
-    --color-text-subtle: var(--gray-6);
     --color-accent: var(--pink-5);
     --color-accent-hover: var(--pink-6);
-    --color-accent-subtle: var(--pink-0);
-    --color-success: var(--green-6);
-    --color-success-bg: var(--light-gray-0);
-    --color-warning: var(--yellow-6);
-    --color-warning-bg: var(--yellow-0);
-    --color-danger: var(--red-6);
-    --color-danger-bg: var(--red-0);
-    --color-info: var(--dark-gray-6);
-    --color-info-bg: var(--dark-gray-0);
   }
 	* {
 		box-sizing: border-box;
@@ -122,19 +116,27 @@
 	html, body {
 		font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 		font-size: 16px;
-		background: var(--wjerk-med-gray);
-		color: var(--color-text);
+		background: var(--color-bg);
+		color: var(--color-ground-text);
 		-webkit-font-smoothing: antialiased;
 	}
 
-	body {
-		border: .5em solid var(--wjerk-dark-gray);
+	/* The Wjerk Dark Gray frame, as on oblique: fixed to the viewport, so it
+	   frames the screen rather than the document and never adds scroll. */
+	body::after {
+		content: '';
+		position: fixed;
+		inset: 0;
+		z-index: 20;
+		border: 0.5rem solid var(--wjerk-dark-gray);
+		pointer-events: none;
 	}
 
-	/* Deliberately visible focus ring, as in kit.css — never suppressed. */
+	/* Deliberately visible focus ring — never suppressed. Ink, not pink: it
+	   has to show on the gray ground as well as on the yellow cards. */
 	a:focus-visible,
 	button:focus-visible {
-		outline: 0.25rem solid var(--color-accent);
+		outline: 0.25rem solid var(--color-focus);
 		outline-offset: 2px;
 	}
 }
@@ -148,16 +150,6 @@
 		width: calc(100% - 32px);
 	}
 
-	.win-titlebar {
-		border-bottom: 2px solid var(--color-text);
-		padding: 20px 32px;
-	}
-
-	.win-title {
-		font-weight: bold;
-		font-size: 20px;
-	}
-
 	.win-body {
 		padding: 40px 32px;
 	}
@@ -168,19 +160,6 @@
 		.win {
 			max-width: 61rem;
 		}
-
-		.win-footer {
-			font-size: 16px;
-		}
-	}
-
-	.win-footer {
-		padding: 16px 32px;
-		font-size: 14px;
-		display: flex;
-		flex-wrap: wrap;
-		gap: 8px 16px;
-		justify-content: space-between;
 	}
 
 	.btn {
@@ -188,41 +167,16 @@
 		font-size: 16px;
 		padding: 14px 28px;
 		border: 2px solid var(--color-text);
-		background: var(--color-bg);
+		background: var(--color-card);
 		color: var(--color-text);
 		cursor: pointer;
-		transition: none;
 		-webkit-appearance: none;
 		appearance: none;
 	}
 
-	.btn:disabled {
-		opacity: 0.4;
-		cursor: default;
-	}
-
-	.btn:active:not(:disabled) {
+	.btn:active {
 		background: var(--color-text);
-		color: var(--color-bg);
-	}
-
-	.btn-black {
-		background: var(--color-accent);
-		border-color: var(--color-accent);
-		color: var(--color-bg);
-		font-weight: bold;
-	}
-
-	.btn-black:active:not(:disabled) {
-		background: var(--color-accent-hover);
-		border-color: var(--color-accent-hover);
-		color: var(--color-bg);
-	}
-
-	.divider {
-		border: none;
-		border-top: 2px solid var(--color-text);
-		margin: 24px 0;
+		color: var(--color-on-fill);
 	}
 
 	.mantra {

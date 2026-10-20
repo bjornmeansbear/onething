@@ -1,6 +1,5 @@
 import { json, error } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
-import { byTier } from '$lib/priority.js';
 
 /** @type {import('./$types').RequestHandler} */
 export async function GET({ platform }) {
@@ -52,7 +51,6 @@ export async function GET({ platform }) {
 		const props = page.properties;
 
 		const name = props.Name?.title?.[0]?.plain_text ?? '(untitled)';
-		const done = props.Done?.checkbox ?? false;
 		const important = props.Important?.checkbox ?? false;
 		const urgent = props.Urgent?.checkbox ?? false;
 		const dueDate = props['Due Date']?.date?.start ?? null;
@@ -60,9 +58,9 @@ export async function GET({ platform }) {
 		const impact = props.Impact?.select?.name ?? null;
 		const timeEstimate = props['Time Estimate']?.select?.name ?? null;
 
-		return { id: page.id, name, done, important, urgent, dueDate, effort, impact, timeEstimate };
+		return { id: page.id, name, important, urgent, dueDate, effort, impact, timeEstimate };
 	});
 
-	// Tier order, so the first 5 are a sane stack even if the AI sort fails
-	return json(byTier(tasks));
+	// Ordering happens in /api/sort (or byUrgency on the client if that fails).
+	return json(tasks);
 }

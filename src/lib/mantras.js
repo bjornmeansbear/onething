@@ -11,7 +11,3 @@ export const MANTRAS = [
 	"Future me values long-term rewards, but only present me can act. So act!",
 	"I have a clear mind, ready to tackle one problem at a time."
 ];
-
-export function randomMantra() {
-	return MANTRAS[Math.floor(Math.random() * MANTRAS.length)];
-}

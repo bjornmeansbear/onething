@@ -1,13 +1,11 @@
 import { json, error } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
-import { tier, byUrgency, TIER_LABELS } from '$lib/priority.js';
-
-const STACK_SIZE = 5;
+import { tier, byUrgency, TIER_LABELS, STACK_SIZE } from '$lib/priority.js';
 
 /** @type {import('./$types').RequestHandler} */
 export async function POST({ request, platform }) {
 	const apiKey = platform?.env?.ANTHROPIC_API_KEY ?? env.ANTHROPIC_API_KEY;
-	const { tasks, context } = await request.json();
+	const { tasks } = await request.json();
 
 	if (!tasks?.length) {
 		throw error(400, 'No tasks to sort');
@@ -41,11 +39,7 @@ export async function POST({ request, platform }) {
 		)
 		.join('\n');
 
-	const contextBlock = context
-		? `\nSession context:\n- Important today: ${context.important || 'nothing noted'}\n- Meetings: ${context.meetings || 'none'}\n- Carried over: ${context.carried || 'nothing'}\n`
-		: '';
-
-	const prompt = `You are a personal executive functioning coach. Below are this person's top incomplete tasks — they have not pre-filtered this list themselves. Your job is to PICK ${STACK_SIZE} for today and RANK them, so they don't have to decide anything.${contextBlock}
+	const prompt = `You are a personal executive functioning coach. Below are this person's top incomplete tasks — they have not pre-filtered this list themselves. Your job is to PICK ${STACK_SIZE} for today and RANK them, so they don't have to decide anything.
 Each task is tagged with its priority group. The groups are a strict order, set by the person, and you must not override it:
 ${TIER_LABELS.map((l, i) => `${i + 1}. [${l}]`).join('\n')}
 Never pick a task from a later group while an earlier group still has unpicked tasks. Your judgement is for ordering tasks WITHIN a group, and for choosing which ones make the cut when a group has more than fit.

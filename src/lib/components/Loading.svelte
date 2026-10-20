@@ -1,22 +1,22 @@
 <script>
 	export let error = '';
 	export let empty = false;
+	export let sorting = false;
 	export let onRetry;
 </script>
 
-{#if error}
-	<div class="text-center py-16">
-		<p class="text-[color:var(--color-danger)] mb-4">{error}</p>
+<div class="text-center py-16">
+	{#if error}
+		<p class="mb-4">{error}</p>
 		<button class="btn" on:click={onRetry}>Try again →</button>
-	</div>
-{:else if empty}
-	<div class="text-center py-16 text-[color:var(--color-text-muted)]">
-		<div class="text-4xl mb-4">■</div>
-		Nothing incomplete in Notion right now. Nice.
-	</div>
-{:else}
-	<div class="text-center py-16 text-[color:var(--color-text-muted)]">
-		<div class="text-4xl mb-4">■</div>
-		Loading from Notion...
-	</div>
-{/if}
+	{:else}
+		<div class="text-4xl mb-4" class:animate-pulse={sorting} aria-hidden="true">■</div>
+		{#if sorting}
+			Building your stack...
+		{:else if empty}
+			Nothing incomplete in Notion right now. Nice.
+		{:else}
+			Loading from Notion...
+		{/if}
+	{/if}
+</div>

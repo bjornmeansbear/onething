@@ -1,4 +1,6 @@
 <script>
+	import { STACK_SIZE } from '$lib/priority.js';
+
 	export let doneCount;
 	export let onNext;
 
@@ -25,7 +27,7 @@
 				<span class="small">Stack complete</span>
 				<span class="big">{doneCount} for {doneCount}</span>
 			{/if}
-			<span class="next">Deal the next 5 →</span>
+			<span class="next">Deal the next {STACK_SIZE} →</span>
 		</span>
 	</button>
 	<p class="rest">Everything else can wait.</p>
@@ -44,7 +46,7 @@
 		width: clamp(15rem, 60vw, 22rem);
 		max-width: 100%;
 		aspect-ratio: 1;
-		color: var(--color-bg);
+		color: var(--color-on-fill);
 		transform: rotate(-8deg);
 		animation: settle 320ms cubic-bezier(0.2, 1.4, 0.4, 1) 560ms backwards;
 	}
@@ -108,7 +110,6 @@
 
 	.rest {
 		margin-top: 1.5rem;
-		color: var(--color-text-muted);
 	}
 
 	@keyframes settle {

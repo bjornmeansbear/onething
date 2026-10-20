@@ -42,7 +42,7 @@
 		flex-direction: column;
 		height: 100%;
 		border: 2px solid var(--color-text);
-		background: var(--yellow-0);
+		background: var(--color-card);
 	}
 
 	.body {
@@ -95,13 +95,12 @@
 
 	.skip:active {
 		background: var(--yellow-2);
-		color: var(--color-text);
 	}
 
 	.done {
 		border-left: 2px solid var(--color-text);
 		background: var(--color-accent);
-		color: var(--color-bg);
+		color: var(--color-on-fill);
 	}
 
 	.done:active {
@@ -113,7 +112,6 @@
 	@media (hover: hover) {
 		.skip:hover {
 			background: var(--yellow-2);
-			color: var(--color-text);
 		}
 		.done:hover {
 			background: var(--color-accent-hover);
@@ -128,7 +126,7 @@
 		left: 1rem;
 		padding: 0.125rem 0.625rem;
 		background: var(--tab-ground, var(--brown-9));
-		color: var(--color-bg);
+		color: var(--color-on-fill);
 		font-size: 0.75rem;
 		line-height: 1.125rem;
 		font-weight: bold;
@@ -148,7 +146,7 @@
 		padding: 0.5rem 1rem;
 		border: 2px solid var(--color-text);
 		background: var(--color-accent);
-		color: var(--color-bg);
+		color: var(--color-on-fill);
 		font-size: 1.5rem;
 		line-height: 1.5rem;
 		font-weight: bold;

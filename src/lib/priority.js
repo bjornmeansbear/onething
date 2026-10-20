@@ -1,3 +1,6 @@
+// How many cards a stack deals.
+export const STACK_SIZE = 5;
+
 // The order tasks get dealt in. This is a hard rule, not a hint to the AI:
 // a lower tier never comes up while a higher one still has tasks in it.
 //   0  important + urgent, with a due date
@@ -18,11 +21,6 @@ export function tier(task) {
 	if (task.important) return 2;
 	if (task.urgent) return 3;
 	return 4;
-}
-
-// Stable — tasks in the same tier keep the order they came in.
-export function byTier(tasks) {
-	return [...tasks].sort((a, b) => tier(a) - tier(b));
 }
 
 // The order without the AI: tier first, then the soonest due date (undated
