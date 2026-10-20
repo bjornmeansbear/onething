@@ -37,7 +37,7 @@
 	.card {
 		position: relative;
 		border: 2px solid var(--color-text);
-		background: var(--color-bg);
+		background: var(--yellow-0);
 	}
 
 	.body {
@@ -88,8 +88,8 @@
 	}
 
 	.skip:active {
-		background: var(--color-text);
-		color: var(--color-bg);
+		background: var(--yellow-2);
+		color: var(--color-text);
 	}
 
 	.done {
@@ -106,8 +106,8 @@
 	   tap and bleeds onto the next card. */
 	@media (hover: hover) {
 		.skip:hover {
-			background: var(--color-text);
-			color: var(--color-bg);
+			background: var(--yellow-2);
+			color: var(--color-text);
 		}
 		.done:hover {
 			background: var(--color-accent-hover);
@@ -121,7 +121,7 @@
 		bottom: 100%;
 		left: 1rem;
 		padding: 0.125rem 0.625rem;
-		background: var(--color-text);
+		background: var(--tab-ground, var(--brown-9));
 		color: var(--color-bg);
 		font-size: 0.75rem;
 		line-height: 1.125rem;

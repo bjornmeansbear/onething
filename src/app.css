@@ -79,11 +79,23 @@
     --black-9: rgb(45,40,38);
     --wjerk-white: var(--white-0);
     --wjerk-black: var(--black-9);
+    /* The rest of the original Wjerk palette at exact values — mirrors
+       color-system-and-guidelines/kit.css (2026-10-19). */
+    --wjerk-brown: #3C3634;            --wjerk-dark-gray: #616767;
+    --wjerk-med-gray: #858479;         --wjerk-pink: #DB4F7A;
+    --wjerk-red: #9F5B59;              --wjerk-orange: #B97868;
+    --wjerk-yellow: #C5C071;           --wjerk-goldenrod: #CBAA46;
+    --wjerk-light-green-gray: #C5D3BD; --wjerk-green: #91A478;
+    --wjerk-dark-green: #6A8472;       --wjerk-light-blue: #A1B2B1;
+    --wjerk-cornflower: #627FBB;       --wjerk-dark-cornflower: #3E5F9A;
+    --wjerk-navy: #2C416B;             --wjerk-purple: #A38DA1;
+    --wjerk-purple-gray: #777783;
 
     /* semantic tokens — see palette-docs.html for the source mapping.
        text-muted is gray-6 (7.3:1 on --color-bg), not gray-5 (4.35:1, fails AA) —
        gray-4/gray-5 read fine as isolated swatches but fail as text on this bg. */
     --color-bg: var(--wjerk-white);
+    --color-card: var(--yellow-0);
     --color-surface: var(--wjerk-white);
     --color-surface-2: var(--wjerk-white);
     --color-border: var(--color-text);
@@ -110,9 +122,13 @@
 	html, body {
 		font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 		font-size: 16px;
-		background: var(--color-bg);
+		background: var(--wjerk-med-gray);
 		color: var(--color-text);
 		-webkit-font-smoothing: antialiased;
+	}
+
+	body {
+		border: .5em solid var(--wjerk-dark-gray);
 	}
 
 	/* Deliberately visible focus ring, as in kit.css — never suppressed. */
@@ -127,9 +143,8 @@
 	/* No outer box — the cards themselves carry the border. This wrapper is
 	   just a max-width/centering container. */
 	.win {
-		background: var(--color-bg);
 		margin: 32px auto;
-		max-width: 640px;
+		max-width: 760px;
 		width: calc(100% - 32px);
 	}
 
@@ -151,7 +166,7 @@
 	   in Card.svelte. */
 	@media (min-width: 55rem) {
 		.win {
-			max-width: 54rem;
+			max-width: 61rem;
 		}
 
 		.win-footer {
@@ -162,7 +177,6 @@
 	.win-footer {
 		padding: 16px 32px;
 		font-size: 14px;
-		color: var(--color-text-muted);
 		display: flex;
 		flex-wrap: wrap;
 		gap: 8px 16px;
@@ -213,7 +227,6 @@
 
 	.mantra {
 		font-size: 14px;
-		color: var(--color-text-muted);
 		text-align: center;
 		font-style: italic;
 	}

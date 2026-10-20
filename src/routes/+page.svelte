@@ -120,7 +120,7 @@
 	onMount(startSession);
 </script>
 
-<div class="min-h-screen overflow-x-clip bg-[color:var(--color-bg)] font-mac text-base text-[color:var(--color-text)] pb-16">
+<div class="min-h-screen overflow-x-clip font-mac text-base pb-16">
 
 	{#if phase === 'loading'}
 		<Window>

@@ -29,6 +29,12 @@
 		}))
 		.reverse();
 
+	// Skip-tab ink, counted among the tabs from the back: the farthest-back
+	// tab is brown-9, each tab in front of it a step lighter, never below
+	// brown-6. depth is the card's index in the stack (front = 0).
+	$: tabInk = (depth) =>
+		`var(--brown-${Math.max(9 - stack.slice(depth + 1).filter((c) => c.skipped).length, 6)})`;
+
 	async function act(mark) {
 		if (ghost) return;
 		const card = stack[0];
@@ -49,14 +55,17 @@
 <div class="pile" class:front-tabbed={stack[0]?.skipped}>
 	{#if stack[0]}
 		{#each under as { card, depth, nth }}
-			<div class="under" style="--tilt: {card.tilt}deg; --depth: {depth};">
+			<div
+				class="under"
+				style="--tilt: {card.tilt}deg; --depth: {depth}; --ground: var(--yellow-{Math.min(depth, 4)}); --tab-ground: {tabInk(depth)};"
+			>
 				{#if card.skipped}
 					<span class="tab" style="--nth: {nth};"></span>
 				{/if}
 			</div>
 		{/each}
 
-		<div class="front" style="--tilt: {stack[0].tilt}deg;">
+		<div class="front" style="--tilt: {stack[0].tilt}deg; --tab-ground: {tabInk(0)};">
 			<Card card={stack[0]} onSkip={() => act('skip')} onDone={() => act('done')} />
 		</div>
 	{:else}
@@ -106,7 +115,9 @@
 		position: absolute;
 		inset: 0;
 		border: 2px solid var(--color-text);
-		background: var(--color-bg);
+		/* front card is yellow-0 (Card.svelte); yellow-1 just behind it, a step
+		   deeper per card back, stopping at yellow-4 (yellow-5 drops the border to ~3:1) */
+		background: var(--ground);
 		transform: translate(var(--drop), var(--drop)) rotate(var(--tilt));
 	}
 
@@ -117,7 +128,8 @@
 		width: 1.75rem;
 		/* taller by however far its card sits below the front one */
 		height: calc(1.5rem + var(--drop));
-		background: var(--color-text);
+		/* set per card by tabInk() */
+		background: var(--tab-ground);
 	}
 
 	.ghost {
