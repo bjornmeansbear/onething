@@ -13,11 +13,7 @@
 	{/if}
 
 	<div class="body">
-		<p class="label-upper label">{card.skipped ? 'Back around' : 'Do this now'}</p>
 		<h2 class="title">{card.name}</h2>
-		{#if card.dueDate}
-			<p class="due">Due: {card.dueDate}</p>
-		{/if}
 		{#if card.reason}
 			<p class="reason">↳ {card.reason}</p>
 		{/if}
@@ -41,7 +37,7 @@
 		display: flex;
 		flex-direction: column;
 		height: 100%;
-		border: 2px solid var(--color-text);
+		border: 1px solid var(--color-text);
 		background: var(--color-card);
 	}
 
@@ -50,37 +46,27 @@
 		padding: 2.5rem;
 	}
 
-	.label {
-		margin-bottom: 0.75rem;
-	}
-
 	/* Fluid between the phone and desktop sizes — rem endpoints, so it still
 	   follows the reader's font-size setting. */
 	.title {
 		font-size: clamp(2.25rem, 1.25rem + 4vw, 4rem);
 		line-height: 1.1;
 		font-weight: bold;
-		margin-bottom: 0.75rem;
 		text-wrap: balance;
 		overflow-wrap: anywhere;
-	}
-
-	.due {
-		font-size: 0.875rem;
-		color: var(--color-text-muted);
 	}
 
 	.reason {
 		font-style: italic;
 		color: var(--color-text-muted);
-		border-top: 2px solid var(--color-text);
+		border-top: 1px solid var(--color-text);
 		padding-top: 0.75rem;
 		margin-top: 1rem;
 	}
 
 	.actions {
 		display: flex;
-		border-top: 2px solid var(--color-text);
+		border-top: 1px solid var(--color-text);
 	}
 
 	.actions button {
@@ -98,7 +84,7 @@
 	}
 
 	.done {
-		border-left: 2px solid var(--color-text);
+		border-left: 1px solid var(--color-text);
 		background: var(--color-accent);
 		color: var(--color-on-fill);
 	}
@@ -184,12 +170,6 @@
 		.body {
 			padding: 4.5rem;
 			min-height: 20rem;
-		}
-		.label {
-			font-size: 1rem;
-		}
-		.due {
-			font-size: 1.125rem;
 		}
 		.reason {
 			font-size: 1.25rem;

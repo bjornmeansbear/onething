@@ -149,7 +149,7 @@
 		--drop: calc(var(--depth) * 3px);
 		position: absolute;
 		inset: 0;
-		border: 2px solid var(--color-text);
+		border: 1px solid var(--color-text);
 		/* front card is --color-card (yellow-0); yellow-1 just behind it, a
 		   step deeper per card back, stopping at yellow-4 (yellow-5 drops the
 		   border to ~3:1) */

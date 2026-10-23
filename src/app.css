@@ -184,11 +184,4 @@
 		text-align: center;
 		font-style: italic;
 	}
-
-	.label-upper {
-		font-size: 13px;
-		text-transform: uppercase;
-		letter-spacing: 0.12em;
-		color: var(--color-text-muted);
-	}
 }
