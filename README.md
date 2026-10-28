@@ -53,20 +53,24 @@ The app looks for these properties by exact name, capitals and spaces included.
 |---|---|---|---|
 | `Name` | Title | Yes | The text on the card |
 | `Done` | Checkbox | Yes | Only unchecked tasks load. **Done** checks it. |
+| `Owner` | Select | No | Only `Me` (or blank) is dealt. `Person`, `Agent`, `Drop` never are. |
+| `Stage` | Select | No | `Now` and `Next` are dealt, Now first. `Later` and `Waiting` never are. |
 | `Urgent` | Checkbox | Yes | Sets the deal order (below) |
 | `Important` | Checkbox | Yes | Sets the deal order (below) |
+| `Pivot` | Checkbox | No | Passed to Claude as a tiebreaker |
 | `Due Date` | Date | No | Shown on the card. Sets the deal order. Passed to Claude. |
 | `Effort` | Select | No | Passed to Claude |
 | `Impact` | Select | No | Passed to Claude |
 | `Time Estimate` | Select | No | Passed to Claude |
 
-Tasks are dealt in a fixed order, set in `src/lib/priority.js`:
+Tasks that are someone else's, or not in play, never load. The rest are dealt in a fixed order, set in `src/lib/priority.js`:
 
-1. Important and urgent, with a due date
-2. Important and urgent
-3. Important only
-4. Urgent only
-5. Everything else
+1. Stage is Now
+2. Stage is Next, and Important or Urgent is checked. Also tasks with no Stage yet that are Urgent.
+3. Stage is Next
+4. No Stage yet
+
+A task with no Owner or Stage is treated as new and unsorted, so it still comes through.
 
 A later group never comes up while an earlier one still has tasks. Claude only orders tasks inside a group, and picks which ones make the stack when a group has more than five.
 

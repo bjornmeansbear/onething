@@ -35,7 +35,8 @@ export async function POST({ request, platform }) {
 				(t.dueDate ? ` (due: ${t.dueDate})` : '') +
 				(t.effort ? ` effort:${t.effort}` : '') +
 				(t.impact ? ` impact:${t.impact}` : '') +
-				(t.timeEstimate ? ` estimate:${t.timeEstimate}` : '')
+				(t.timeEstimate ? ` estimate:${t.timeEstimate}` : '') +
+				(t.pivot ? ' pivot' : '')
 		)
 		.join('\n');
 
@@ -49,6 +50,7 @@ Within a group, use these 4 criteria:
 2. Does this make other things easier? (leverage, unlocking)
 3. Can I finish this in one sitting? (sizing — favor completable tasks)
 4. What's the best thing that happens if I DO this? (positive value)
+Tasks marked "pivot" move this person's career change forward. Between two otherwise close tasks, favor the pivot one.
 
 Tasks:
 ${taskList}

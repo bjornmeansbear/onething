@@ -1,5 +1,6 @@
 import { json, error } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
+import { inPlay } from '$lib/priority.js';
 
 /** @type {import('./$types').RequestHandler} */
 export async function GET({ platform }) {
@@ -57,10 +58,26 @@ export async function GET({ platform }) {
 		const effort = props.Effort?.select?.name ?? null;
 		const impact = props.Impact?.select?.name ?? null;
 		const timeEstimate = props['Time Estimate']?.select?.name ?? null;
+		const owner = props.Owner?.select?.name ?? null;
+		const stage = props.Stage?.select?.name ?? null;
+		const pivot = props.Pivot?.checkbox ?? false;
 
-		return { id: page.id, name, important, urgent, dueDate, effort, impact, timeEstimate };
+		return {
+			id: page.id,
+			name,
+			important,
+			urgent,
+			dueDate,
+			effort,
+			impact,
+			timeEstimate,
+			owner,
+			stage,
+			pivot
+		};
 	});
 
-	// Ordering happens in /api/sort (or byUrgency on the client if that fails).
-	return json(tasks);
+	// Only tasks that are mine and in play reach the deck. Ordering happens in
+	// /api/sort (or byUrgency on the client if that fails).
+	return json(tasks.filter(inPlay));
 }
